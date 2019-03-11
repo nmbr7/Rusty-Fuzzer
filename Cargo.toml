@@ -1,0 +1,7 @@
+[package]
+name = "rusty-fuzzer"
+version = "0.1.0"
+authors = ["nmbr_7"]
+edition = "2018"
+
+[dependencies]
