@@ -5,3 +5,5 @@ authors = ["nmbr_7"]
 edition = "2018"
 
 [dependencies]
+clap = "~2.27.0"
+chrono = "0.4.6"
