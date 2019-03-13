@@ -1,72 +1,87 @@
 extern crate chrono;
 use chrono::{DateTime, Utc};
 
-use std::time::{Duration, Instant, SystemTime};
 use std::collections::hash_map::DefaultHasher;
+use std::time::{Duration, Instant, SystemTime};
 
-pub struct SeedConf {
-    id: u32,
-    seed: Vec<u64>,
-    time: ExecTime,
-    parents: Vec<u64>,
-    exit_stat: Stat,
-    fitness: u8,   
+pub struct SeedConfig {
+    id: Option<u32>,
+    seed: Option<Vec<String>>,
+    time: Option<ExecTime>,
+    parents: Option<Vec<u64>>,
+    exit_stat: Option<Stat>,
+    fitness: Option<u8>,
 }
 
-impl SeedConf{
-    pub fn new(seed: Vec<u64>, limit: u8,id: u32 ) -> SeedConf {
-        SeedConf{
+impl SeedConfig {
+    pub fn new(seed: Option<Vec<String>>) -> SeedConfig {
+        SeedConfig {
             seed,
-            time: ExecTime {limit},
-            id,
+            time: Some(ExecTime {
+                limit: None,
+                total: None,
+            }),
+            id: Some(0),
+            exit_stat: None,
+            fitness: None,
+            parents: None,
         }
     }
 }
 
 struct ExecTime {
-    limit: u8,
-    total: Duration,
+    limit: Option<u8>,
+    total: Option<Duration>,
 }
 
-struct CrashHash{
+struct CrashHash {
     headhash: DefaultHasher,
     tailhash: DefaultHasher,
     fullhash: DefaultHasher,
 }
 
-enum Stat{
+enum Stat {
     SUCCESS,
     CRASH(CrashHash),
     HANG,
 }
-pub struct ProgConf {
-    inputpath: String,
-    outputdir: String,
+pub struct ProgConfig {
+    inputpath:  String,
+    outputdir:  String,
+    timeout: u8,
 }
 
-impl ProgConf{
-    pub fn init(inputpath:String, outputdir:String) -> ProgConf {
-        ProgConf{
+impl ProgConfig {
+    pub fn init(inputpath:  String , outputdir: String , limit: u8) -> ProgConfig {
+        ProgConfig {
             inputpath,
             outputdir,
+            timeout: limit,
         }
     }
-} 
-
-pub struct FuzzerStatus {
-    start_time: (DateTime<Utc>,Instant),
-    crash_count: u32,
-    test_count: u32,
-    conf_count: u32,
-    queue_len: u32,
-    valid_crashes: u32,
 }
 
-impl FuzzerStatus{
-    pub fn init(conf_count: u32) -> FuzzerStatus {
-        FuzzerStatus{
+pub struct FuzzerStatus {
+    start_time: (DateTime<Utc>, Instant),
+    crash_count: Option<u32>,
+    test_count: Option<u32>,
+    conf_count: Option<usize>,
+    queue_len: Option<u32>,
+    valid_crashes: Option<u32>,
+}
+
+impl FuzzerStatus {
+    pub fn init(conf_count: Option<usize>) -> FuzzerStatus {
+        FuzzerStatus {
             conf_count,
-            start_time: (Utc::now()/*.format("%a %b %e %T %Y")*/,Instant::now()),
+            start_time: (
+                Utc::now(), /*.format("%a %b %e %T %Y")*/
+                Instant::now(),
+            ),
+            crash_count: None,
+            queue_len: None,
+            valid_crashes: None,
+            test_count: None,
         }
     }
-} 
+}
