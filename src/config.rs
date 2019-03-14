@@ -1,87 +1,91 @@
 extern crate chrono;
 use chrono::{DateTime, Utc};
-
 use std::collections::hash_map::DefaultHasher;
+use std::collections::VecDeque;
+use std::fs::{self, File};
+use std::io::prelude::*;
+use std::io::{self, BufReader};
 use std::time::{Duration, Instant, SystemTime};
 
+#[derive(Debug, Clone)]
 pub struct SeedConfig {
-    id: Option<u32>,
-    seed: Option<Vec<String>>,
-    time: Option<ExecTime>,
-    parents: Option<Vec<u64>>,
-    exit_stat: Option<Stat>,
-    fitness: Option<u8>,
+    arg_count: usize,
+    id: usize,
+    pub seed: Vec<String>,
+    time: ExecTime,
+    parents: Vec<u32>,
+    exit_stat: Stat,
+    fitness: u8,
 }
 
 impl SeedConfig {
-    pub fn new(seed: Option<Vec<String>>) -> SeedConfig {
-        SeedConfig {
+        pub fn new(seed: Vec<String>,id: usize) -> Self {
+        
+        Self {
+            arg_count: seed.len(),
             seed,
-            time: Some(ExecTime {
-                limit: None,
-                total: None,
-            }),
-            id: Some(0),
-            exit_stat: None,
-            fitness: None,
-            parents: None,
+            time: ExecTime {
+                limit: 0,
+                total: [].to_vec(),
+            },
+            id,
+            exit_stat: Stat::NONE,
+            fitness: 0,
+            parents: [].to_vec(),
         }
     }
-}
 
+    pub fn update() -> std::io::Result<()> {
+        Ok(())
+    }
+
+    pub fn init_queue(seedfile: &str) -> std::io::Result<VecDeque<SeedConfig>> {
+        let mut config_queue: VecDeque<SeedConfig> = VecDeque::new();
+        for (id,path) in fs::read_dir(seedfile)?.enumerate() {
+            let file = path?;
+            let f = File::open(file.path())?;
+            let f = BufReader::new(f);
+            let mut seedv: Vec<String> = Vec::new();
+            for line in f.lines() {
+                seedv.push(line.unwrap());
+            }
+            let conf = SeedConfig::new(seedv.clone(),id);
+            config_queue.push_back(conf);
+        }
+        Ok(config_queue)
+    }
+}
+#[derive(Debug, Clone)]
 struct ExecTime {
-    limit: Option<u8>,
-    total: Option<Duration>,
+    limit: u32,
+    total: Vec<Duration>,
 }
-
+#[derive(Debug, Clone)]
 struct CrashHash {
     headhash: DefaultHasher,
     tailhash: DefaultHasher,
     fullhash: DefaultHasher,
 }
-
+#[derive(Debug, Clone)]
 enum Stat {
+    NONE,
     SUCCESS,
     CRASH(CrashHash),
     HANG,
 }
+#[derive(Debug, Clone)]
 pub struct ProgConfig {
-    inputpath:  String,
-    outputdir:  String,
-    timeout: u8,
+    inputpath: String,
+    outputdir: String,
+    timeout: u32,
 }
 
 impl ProgConfig {
-    pub fn init(inputpath:  String , outputdir: String , limit: u8) -> ProgConfig {
-        ProgConfig {
+    pub fn init(inputpath: String, outputdir: String, limit: u32) -> Self {
+        Self {
             inputpath,
             outputdir,
             timeout: limit,
-        }
-    }
-}
-
-pub struct FuzzerStatus {
-    start_time: (DateTime<Utc>, Instant),
-    crash_count: Option<u32>,
-    test_count: Option<u32>,
-    conf_count: Option<usize>,
-    queue_len: Option<u32>,
-    valid_crashes: Option<u32>,
-}
-
-impl FuzzerStatus {
-    pub fn init(conf_count: Option<usize>) -> FuzzerStatus {
-        FuzzerStatus {
-            conf_count,
-            start_time: (
-                Utc::now(), /*.format("%a %b %e %T %Y")*/
-                Instant::now(),
-            ),
-            crash_count: None,
-            queue_len: None,
-            valid_crashes: None,
-            test_count: None,
         }
     }
 }
