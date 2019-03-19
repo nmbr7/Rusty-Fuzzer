@@ -3,17 +3,20 @@
 extern crate log;
 #[macro_use]
 extern crate clap;
+
 mod config;
 mod fuzzstat;
+//mod scheduler;
+//mod mutengine;
+//mod execengine;
+//mod configupdater;
+
+
 use config::{ProgConfig, SeedConfig};
 use fuzzstat::{FuzzerStatus};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
-//use scheduler;
-//use mutengine;
-//use execengine;
-//use configupdater;
 
 fn main() {
     let args = clap_app!(fuzzer =>
