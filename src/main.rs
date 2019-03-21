@@ -6,12 +6,12 @@ extern crate clap;
 
 mod config;
 mod fuzzstat;
+mod execengine;
 //mod scheduler;
 //mod mutengine;
-//mod execengine;
 //mod configupdater;
 
-
+use execengine::exec_fuzz;
 use config::{ProgConfig, SeedConfig};
 use fuzzstat::{FuzzerStatus};
 use std::fs::File;
@@ -43,13 +43,22 @@ fn main() {
             " \nseed : {:?}\ninput : {}\nOutDir : {}\nTimeout : {}\n",
             conf_queue[i], input, output, timeout
         );
-    fuzzer_status.update(conf_queue.len());
+    //fuzzer_status.update(conf_queue.len());
     }
     /// Debug
     println!("{:?}\n", fuzzer_status);
+
+    
     let prog_config = ProgConfig::init(
         input.to_string(),
         output.to_string(),
         timeout.parse::<u32>().unwrap(),
-    );
+                );
+
+
+    //Temp
+    exec_fuzz(&conf_queue[0],&prog_config);
+
+
+
 }

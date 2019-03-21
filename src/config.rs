@@ -9,13 +9,13 @@ use std::time::{Duration, Instant, SystemTime};
 
 #[derive(Debug, Clone)]
 pub struct SeedConfig {
-    arg_count: usize,
-    id: usize,
+    pub arg_count: usize,
+    pub id: usize,
     pub seed: Vec<String>,
-    time: ExecTime,
-    parents: Vec<u32>,
-    exit_stat: Stat,
-    fitness: u8,
+    pub time: ExecTime,
+    pub parents: Vec<u32>,
+    pub exit_stat: Stat,
+    pub fitness: u8,
 }
 
 impl SeedConfig {
@@ -56,18 +56,18 @@ impl SeedConfig {
     }
 }
 #[derive(Debug, Clone)]
-struct ExecTime {
-    limit: u32,
-    total: Vec<Duration>,
+pub struct ExecTime {
+    pub limit: u32,
+    pub total: Vec<Duration>,
 }
 #[derive(Debug, Clone)]
-struct CrashHash {
-    headhash: DefaultHasher,
-    tailhash: DefaultHasher,
-    fullhash: DefaultHasher,
+pub struct CrashHash {
+    pub headhash: DefaultHasher,
+    pub tailhash: DefaultHasher,
+    pub fullhash: DefaultHasher,
 }
 #[derive(Debug, Clone)]
-enum Stat {
+pub enum Stat {
     NONE,
     SUCCESS,
     CRASH(CrashHash),
@@ -75,9 +75,9 @@ enum Stat {
 }
 #[derive(Debug, Clone)]
 pub struct ProgConfig {
-    inputpath: String,
-    outputdir: String,
-    timeout: u32,
+    pub inputpath: String,
+    pub outputdir: String,
+    pub timeout: u32,
 }
 
 impl ProgConfig {
