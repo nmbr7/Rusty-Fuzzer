@@ -4,7 +4,7 @@ use std::os::unix::process::ExitStatusExt;
 use nix::sys::wait::waitpid;
 use nix::unistd::{alarm, close, fork, pipe, read, ForkResult, write};
 use std::os::unix::io::FromRawFd;
-use std::process::{Command, Stdio};
+use std::process::{Command, Stdio,exit};
 use std::{format,env,str,fmt};
 
 use crate::config::{ProgConfig,Stat, SeedConfig}; 
@@ -15,7 +15,7 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
     //let args: Vec<String> = env::args().collect();
     match fork() {
         Ok(ForkResult::Parent { child, .. }) => {
-            eprintln!("Inside parent ,child pid is {}", child);
+            //eprintln!("Inside parent ,child pid is {}", child);
             let mut arr: [u8; 1] = [0; 1];
             close(fd_d.1);
             close(fd_c.1);
@@ -28,7 +28,7 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
             let mut len = [1,1];
             let mut data: Vec<u8> = Vec::new();
             let mut control: Vec<u8> = Vec::new();
-            waitpid(child, None);
+            //waitpid(child, None);
             loop {
                 if len[0] == 0 {
                     break;
@@ -49,7 +49,7 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
                         seed_config.exit_stat = Stat::CRASH; 
             } 
 
-            println!("Data {}\nControl {:?}", String::from_utf8(data).unwrap(),control[0]);
+            //println!("Data {:?}\nControl {:?}", String::from_utf8(data).unwrap(),control);
 
         }
         
@@ -57,7 +57,7 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
         Ok(ForkResult::Child) => {
             close(fd_d.0);
             close(fd_c.0);
-            eprintln!("Inside Child");
+           // eprintln!("Inside Child");
             let mut args: Vec<String> = Vec::new();
             args.push(prog_config.inputpath.clone());
             for i in seed_config.seed.clone(){//.into_iter().map(|s| s);
@@ -76,6 +76,9 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
                 let exit_code = output.code().unwrap();
                 let mut buf : [u8;1] = [exit_code as u8];
                 let lene = write(fd_c.1,&buf).unwrap();
+                //println!("{} args {:?}",exit_code,args);
+
+            exit(exit_code);
             }
         }
         Err(_) => println!("Fork failed"),

@@ -37,8 +37,9 @@ fn main() {
                 );
     let mut conf_queue = SeedConfig::init_queue(seed,prog_config.inputpath.clone()).unwrap();
     let mut fuzzer_status = FuzzerStatus::init(conf_queue.len());
+    sched(&mut conf_queue,prog_config,&mut fuzzer_status);
 
-    /// Debug
+    /* Debug
     for i in 0..conf_queue.len() {
         println!(
             " \nseed : {:?}\ninput : {}\nTimeout : {}\n",
@@ -46,14 +47,13 @@ fn main() {
         );
     //fuzzer_status.update(conf_queue.len());
     }
-    /// Debug
-    sched(&mut conf_queue,prog_config);
-    println!("{:?}\n", fuzzer_status);
-    for i in 0..conf_queue.len() {
+    */ 
+    /*for i in 0..conf_queue.len() {
         println!(
             " \nseed : {:?}\ninput : {}\nTimeout : {}\n",
             conf_queue[i], input, timeout
         );
+        }*/
 
-}
+
 }
