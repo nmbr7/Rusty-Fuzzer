@@ -7,11 +7,10 @@ extern crate clap;
 mod config;
 mod fuzzstat;
 mod execengine;
-//mod scheduler;
+mod scheduler;
 //mod mutengine;
 //mod configupdater;
-
-use execengine::exec_fuzz;
+use scheduler::sched;
 use config::{ProgConfig, SeedConfig};
 use fuzzstat::{FuzzerStatus};
 use std::fs::File;
@@ -48,15 +47,13 @@ fn main() {
     //fuzzer_status.update(conf_queue.len());
     }
     /// Debug
-
+    sched(&mut conf_queue,prog_config);
     println!("{:?}\n", fuzzer_status);
+    for i in 0..conf_queue.len() {
+        println!(
+            " \nseed : {:?}\ninput : {}\nTimeout : {}\n",
+            conf_queue[i], input, timeout
+        );
 
-    
-
-
-    //Temp
-    exec_fuzz(&conf_queue[0],&prog_config);
-
-
-
+}
 }

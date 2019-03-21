@@ -68,17 +68,18 @@ pub struct ExecTime {
     pub limit: u32,
     pub total: Vec<Duration>,
 }
-#[derive(Debug, Clone)]
+/*#[derive(Debug, Clone)]
 pub struct CrashHash {
     pub headhash: DefaultHasher,
     pub tailhash: DefaultHasher,
     pub fullhash: DefaultHasher,
 }
+*/
 #[derive(Debug, Clone)]
 pub enum Stat {
     NONE,
     SUCCESS,
-    CRASH(CrashHash),
+    CRASH,//(CrashHash),
     HANG,
 }
 #[derive(Debug, Clone)]

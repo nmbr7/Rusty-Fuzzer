@@ -7,9 +7,9 @@ use std::os::unix::io::FromRawFd;
 use std::process::{Command, Stdio};
 use std::{format,env,str,fmt};
 
-use crate::config::{ProgConfig, SeedConfig}; 
+use crate::config::{ProgConfig,Stat, SeedConfig}; 
 
-pub fn exec_fuzz(seed_config: &SeedConfig, prog_config: &ProgConfig) {
+pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
     let fd_d = pipe().unwrap();
     let fd_c = pipe().unwrap();
     //let args: Vec<String> = env::args().collect();
@@ -46,8 +46,7 @@ pub fn exec_fuzz(seed_config: &SeedConfig, prog_config: &ProgConfig) {
             }
 
             if control[0] != 0 {
-
-
+                        seed_config.exit_stat = Stat::CRASH; 
             } 
 
             println!("Data {}\nControl {:?}", String::from_utf8(data).unwrap(),control[0]);
@@ -69,7 +68,7 @@ pub fn exec_fuzz(seed_config: &SeedConfig, prog_config: &ProgConfig) {
             unsafe {
                 let output = Command::new(&args[0])
                     .args(&args[1..seed_config.arg_count+1])
-                    .stdout()//Stdio::from_raw_fd(fd_d.1))
+                    .stdout(Stdio::null())//Stdio::from_raw_fd(fd_d.1))
                     .stderr(Stdio::from_raw_fd(fd_d.1))
                     .status()
                     .expect("Failed to execute process");
