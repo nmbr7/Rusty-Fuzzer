@@ -16,6 +16,9 @@ pub struct SeedConfig {
     pub parents: Vec<u32>,
     pub exit_stat: Stat,
     pub fitness: u8,
+    pub output:String,
+    pub input:String,
+
 }
 
 impl SeedConfig {
@@ -32,6 +35,8 @@ impl SeedConfig {
             exit_stat: Stat::NONE,
             fitness: 0,
             parents: [].to_vec(),
+            output: format!("crash_{}",id),
+            input : format!("seed_{}",id),
         }
     }
 
@@ -39,9 +44,10 @@ impl SeedConfig {
         Ok(())
     }
 
-    pub fn init_queue(seedfile: &str) -> std::io::Result<VecDeque<SeedConfig>> {
+    pub fn init_queue(seedfile: &str,input: String) -> std::io::Result<VecDeque<SeedConfig>> {
         let mut config_queue: VecDeque<SeedConfig> = VecDeque::new();
         for (id,path) in fs::read_dir(seedfile)?.enumerate() {
+            
             let file = path?;
             let f = File::open(file.path())?;
             let f = BufReader::new(f);
@@ -50,6 +56,8 @@ impl SeedConfig {
                 seedv.push(line.unwrap());
             }
             let conf = SeedConfig::new(seedv.clone(),id);
+            File::create(format!("{}_FuzzDir/input_set/{}",input,conf.input)).unwrap();
+
             config_queue.push_back(conf);
         }
         Ok(config_queue)
@@ -81,10 +89,13 @@ pub struct ProgConfig {
 }
 
 impl ProgConfig {
-    pub fn init(inputpath: String, outputdir: String, limit: u32) -> Self {
+    pub fn init(inputpath : String, limit: u32) -> Self {
+        fs::create_dir_all(format!("{}_FuzzDir/Crash",inputpath)).unwrap();
+        fs::create_dir_all(format!("{}_FuzzDir/input_set",inputpath)).unwrap();
+        File::create(format!("{}_FuzzDir/log",inputpath)).unwrap();
         Self {
-            inputpath,
-            outputdir,
+            inputpath: inputpath.clone(),
+            outputdir: format!("{}_FuzzDir",inputpath),
             timeout: limit,
         }
     }

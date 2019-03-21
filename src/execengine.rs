@@ -25,10 +25,10 @@ pub fn exec_fuzz(seed_config: &SeedConfig, prog_config: &ProgConfig) {
               **/
 
       
-          waitpid(child, None);
             let mut len = [1,1];
             let mut data: Vec<u8> = Vec::new();
             let mut control: Vec<u8> = Vec::new();
+            waitpid(child, None);
             loop {
                 if len[0] == 0 {
                     break;
@@ -36,6 +36,7 @@ pub fn exec_fuzz(seed_config: &SeedConfig, prog_config: &ProgConfig) {
                 len[0] = read(fd_d.0, &mut arr).unwrap();
                 data.push(arr[0]);
             }
+            
             loop {
                 if len[1] == 0 {
                     break;
@@ -46,7 +47,7 @@ pub fn exec_fuzz(seed_config: &SeedConfig, prog_config: &ProgConfig) {
 
             if control[0] != 0 {
 
-            
+
             } 
 
             println!("Data {}\nControl {:?}", String::from_utf8(data).unwrap(),control[0]);
@@ -68,7 +69,7 @@ pub fn exec_fuzz(seed_config: &SeedConfig, prog_config: &ProgConfig) {
             unsafe {
                 let output = Command::new(&args[0])
                     .args(&args[1..seed_config.arg_count+1])
-                    .stdout(Stdio::from_raw_fd(fd_d.1))
+                    .stdout()//Stdio::from_raw_fd(fd_d.1))
                     .stderr(Stdio::from_raw_fd(fd_d.1))
                     .status()
                     .expect("Failed to execute process");
