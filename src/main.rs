@@ -5,14 +5,14 @@ extern crate log;
 extern crate clap;
 
 mod config;
-mod fuzzstat;
 mod execengine;
+mod fuzzstat;
 mod scheduler;
 //mod mutengine;
 //mod configupdater;
-use scheduler::sched;
 use config::{ProgConfig, SeedConfig};
-use fuzzstat::{FuzzerStatus};
+use fuzzstat::FuzzerStatus;
+use scheduler::sched;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
@@ -31,13 +31,10 @@ fn main() {
     let input = args.value_of("INPUT_DIR").unwrap();
     let timeout = args.value_of("TIMEOUT").unwrap_or("30");
     let seed = args.value_of("SEED_FILE_DIR").unwrap();
-    let prog_config = ProgConfig::init(
-        input.to_string(),
-        timeout.parse::<u32>().unwrap(),
-                );
-    let mut conf_queue = SeedConfig::init_queue(seed,prog_config.inputpath.clone()).unwrap();
+    let prog_config = ProgConfig::init(input.to_string(), timeout.parse::<u32>().unwrap());
+    let mut conf_queue = SeedConfig::init_queue(seed, prog_config.inputpath.clone()).unwrap();
     let mut fuzzer_status = FuzzerStatus::init(conf_queue.len());
-    sched(&mut conf_queue,prog_config,&mut fuzzer_status);
+    sched(&mut conf_queue, prog_config, &mut fuzzer_status);
 
     /* Debug
     for i in 0..conf_queue.len() {
@@ -47,13 +44,12 @@ fn main() {
         );
     //fuzzer_status.update(conf_queue.len());
     }
-    */ 
+    */
+
     /*for i in 0..conf_queue.len() {
-        println!(
-            " \nseed : {:?}\ninput : {}\nTimeout : {}\n",
-            conf_queue[i], input, timeout
-        );
-        }*/
-
-
+    println!(
+        " \nseed : {:?}\ninput : {}\nTimeout : {}\n",
+        conf_queue[i], input, timeout
+    );
+    }*/
 }

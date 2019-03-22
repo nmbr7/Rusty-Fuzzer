@@ -1,15 +1,15 @@
-use crate::config::{Stat};
-use std::time::{Duration, Instant, SystemTime};
+use crate::config::Stat;
 use chrono::{DateTime, Utc};
+use std::time::{Duration, Instant, SystemTime};
 #[derive(Debug, Clone)]
 pub struct FuzzerStatus {
-    start_time: (DateTime<Utc>, Instant),
-    time_elapsed: Duration,
-    crash_count: u32,
-    test_count: u32,
-    conf_count: usize,
-    queue_len: usize,
-    valid_crashes: u32,
+    pub start_time: (DateTime<Utc>, Instant),
+    pub time_elapsed: Duration,
+    pub crash_count: u32,
+    pub test_count: u32,
+    pub conf_count: usize,
+    pub queue_len: usize,
+    pub valid_crashes: u32,
 }
 
 impl FuzzerStatus {
@@ -28,10 +28,10 @@ impl FuzzerStatus {
         }
     }
 
-    pub fn update(&mut self, quelen: usize,exit_stat : &Stat) -> bool {
+    pub fn update(&mut self, quelen: usize, exit_stat: &Stat) -> bool {
         self.crash_count = match exit_stat {
-            Stat::CRASH => self.crash_count+1,
-             _ => self.crash_count,        
+            Stat::CRASH => self.crash_count + 1,
+            _ => self.crash_count,
         };
         self.queue_len = quelen;
         self.conf_count += 1;
