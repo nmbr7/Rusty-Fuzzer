@@ -1,4 +1,5 @@
 extern crate chrono;
+use crate::mutengine::{MutType, Mutation};
 use chrono::{DateTime, Utc};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
@@ -13,7 +14,7 @@ pub struct SeedConfig {
     pub id: usize,
     pub seed: Vec<u8>,
     pub time: ExecTime,
-    pub parents: Vec<u32>,
+    pub mutation: Mutation,
     pub exit_stat: Stat,
     pub fitness: u8,
     pub output: String,
@@ -30,9 +31,12 @@ impl SeedConfig {
                 total: [].to_vec(),
             },
             id,
+            mutation: Mutation {
+                parent: id,
+                mutant: MutType::None,
+            },
             exit_stat: Stat::NONE,
             fitness: 0,
-            parents: [].to_vec(),
             output: format!("crash_{}", id),
             input: format!("seed_{}", id),
         }

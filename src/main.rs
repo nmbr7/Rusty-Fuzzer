@@ -7,9 +7,9 @@ extern crate clap;
 mod config;
 mod execengine;
 mod fuzzstat;
-mod scheduler;
-mod mutengine;
 mod helpertools;
+mod mutengine;
+mod scheduler;
 //mod configupdater;
 use config::{ProgConfig, SeedConfig};
 use fuzzstat::FuzzerStatus;
@@ -23,8 +23,8 @@ fn main() {
     (version: env!("CARGO_PKG_VERSION"))
     (author: env!("CARGO_PKG_AUTHORS"))
     (about: "A grey box evolutionary fuzzer")
-    (@arg SEED_FILE_DIR: -s --seed +takes_value +required "Seed file to use")
-    (@arg INPUT_DIR: -i --input +takes_value  "Input file name")
+    (@arg SEED_FILE_DIR: -s --seed +takes_value +required "Seed directory to use")
+    (@arg INPUT_FILE: -i --input +takes_value +required "Input file name")
     (@arg TIMEOUT: -l --limit +takes_value "Execution timeout limit")
     )
     .get_matches();
