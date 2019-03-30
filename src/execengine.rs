@@ -1,17 +1,21 @@
+use libc;
 use nix;
 
+use libc::{c_void, uint8_t};
+use libc::{shmat, shmdt, shmget};
 use nix::sys::wait::waitpid;
 use nix::unistd::{alarm, close, fork, pipe, read, write, ForkResult};
 use std::os::unix::io::{FromRawFd, IntoRawFd};
 use std::os::unix::process::ExitStatusExt;
 use std::process::{exit, Command, Stdio};
-use std::{env, fmt, format, fs, str};
+use std::{env, fmt, format, fs, mem, ptr, str};
 
 use crate::config::{ProgConfig, SeedConfig, Stat};
 
 pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
     let fd_d = pipe().unwrap();
     let fd_c = pipe().unwrap();
+
     //let args: Vec<String> = env::args().collect();
     match fork() {
         Ok(ForkResult::Parent { child, .. }) => {
@@ -19,7 +23,21 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
             let mut arr: [u8; 1] = [0; 1];
             close(fd_d.1).unwrap();
             close(fd_c.1).unwrap();
+           
+            unsafe {
+                let shmid = shmget(701707,4100, libc::IPC_CREAT);
+                let shmaddr = &shmat(shmid, std::ptr::null_mut(), 0);
+                println!("shmid {} addr {:?}", shmid, *shmaddr);
+                let p = *shmaddr as *const u8;
+                for i in 0..1024 {
+                    if *p.add(i) > 0 {
+                        println!("Index {} value {}", i, *p.add(i));
+                    }
+                    //ptr::write_bytes(*shmaddr, 0x10, 2);
 
+                }
+            shmdt(*shmaddr);
+            }
             /**TODO
             Implement timeout
             **/
@@ -59,8 +77,8 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
                 .unwrap();
             }
 
-            //println!("Data {} len {}  \nControl {}", String::from_utf8(data.clone()).unwrap(),data.len(),control[0]);
-            //println!("Fuzzer Status\n {} {} [2J",prog_config);
+           println!("Data {} len {}  \nControl {}", String::from_utf8(data.clone()).unwrap(),data.len(),control[0]);
+           // println!("Fuzzer Status\n {} {} [2J",prog_config);
             close(fd_d.0).unwrap();
             close(fd_c.0).unwrap();
         }
@@ -75,8 +93,8 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
 
             unsafe {
                 let output = Command::new(&args[0])
-                    .args(&args[1..2])
-                    .stdout(Stdio::null()) //Stdio::from_raw_fd(fd_d.1))
+                    .args(&args[1..1])
+                    .stdout(/**(Stdio::null())**/Stdio::from_raw_fd(fd_d.1))
                     .stderr(Stdio::from_raw_fd(fd_d.1))
                     .status()
                     .expect("Failed to execute process");
