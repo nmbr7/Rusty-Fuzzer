@@ -23,28 +23,30 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
             let mut arr: [u8; 1] = [0; 1];
             close(fd_d.1).unwrap();
             close(fd_c.1).unwrap();
-           
-            unsafe {
-                let shmid = shmget(701707,4100, libc::IPC_CREAT);
-                let shmaddr = &shmat(shmid, std::ptr::null_mut(), 0);
-                println!("shmid {} addr {:?}", shmid, *shmaddr);
-                let p = *shmaddr as *const u8;
-                for i in 0..1024 {
-                    if *p.add(i) > 0 {
-                        println!("Index {} value {}", i, *p.add(i));
-                    }
-                    //ptr::write_bytes(*shmaddr, 0x10, 2);
 
+            unsafe {
+                let shmid = shmget(701707, 4100, libc::IPC_CREAT);
+                let shmaddr = &shmat(shmid, std::ptr::null_mut(), 0);
+                ptr::write_bytes(*shmaddr, 0, 4100);
+                // println!("shmid {} addr {:?}", shmid, *shmaddr);
+                waitpid(child, None);
+                let p = *shmaddr as *const u8;
+
+                for i in 0..4100 {
+                    if *p.add(i) > 0 {
+                        print!("{} ", *p.add(i));
+                    }
                 }
-            shmdt(*shmaddr);
+                shmdt(*shmaddr);
             }
+
             /**TODO
             Implement timeout
             **/
             let mut len = [1, 1];
             let mut data: Vec<u8> = Vec::new();
             let mut control: Vec<u8> = Vec::new();
-            waitpid(child, None);
+
             loop {
                 if len[0] == 0 {
                     break;
@@ -63,22 +65,22 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
 
             if control[0] != 0 && data.len() > 1 {
                 seed_config.exit_stat = Stat::CRASH;
-                let c: &[u8] = data.as_slice();
-                let s: &[u8] = seed_config.seed.as_slice();
+                //let c: &[u8] = data.as_slice();
+                //let s: &[u8] = seed_config.seed.as_slice();
                 fs::write(
                     format!("{}/Crash/{}", prog_config.outputdir, seed_config.input),
-                    s,
+                    seed_config.seed.as_slice(),
                 )
                 .unwrap();
                 fs::write(
                     format!("{}/Crash/{}", prog_config.outputdir, seed_config.output),
-                    c,
+                    data.as_slice(),
                 )
                 .unwrap();
             }
 
-           println!("Data {} len {}  \nControl {}", String::from_utf8(data.clone()).unwrap(),data.len(),control[0]);
-           // println!("Fuzzer Status\n {} {} [2J",prog_config);
+            //println!("Data {} len {}  Control {}", String::from_utf9(data.clone()).unwrap(),data.len(),control[0]);
+            // println!("Fuzzer Status\n {} {} [2J",prog_config);
             close(fd_d.0).unwrap();
             close(fd_c.0).unwrap();
         }
@@ -89,12 +91,14 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
             // eprintln!("Inside Child");
             let mut args: Vec<String> = Vec::new();
             args.push(prog_config.inputpath.clone());
-            //for i in seed_config.seed.clone(){//.into_iter().map(|s| s);
-
+            //args.push(seed_config.seed.clone());
+            args.push(String::from_utf8(seed_config.seed.clone()).unwrap());
+            println!("{:?} len {}", args, args.len());
             unsafe {
                 let output = Command::new(&args[0])
-                    .args(&args[1..1])
-                    .stdout(/**(Stdio::null())**/Stdio::from_raw_fd(fd_d.1))
+                    .args(&args[1..args.len()])
+                    .stdout(/**(Stdio::null())**/
+                    Stdio::from_raw_fd(fd_d.1))
                     .stderr(Stdio::from_raw_fd(fd_d.1))
                     .status()
                     .expect("Failed to execute process");
