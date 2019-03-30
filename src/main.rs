@@ -29,7 +29,7 @@ fn main() {
     )
     .get_matches();
 
-    let input = args.value_of("INPUT_DIR").unwrap();
+    let input = args.value_of("INPUT_FILE").unwrap();
     let timeout = args.value_of("TIMEOUT").unwrap_or("30");
     let seed = args.value_of("SEED_FILE_DIR").unwrap();
     let prog_config = ProgConfig::init(input.to_string(), timeout.parse::<u32>().unwrap());
