@@ -10,14 +10,19 @@ pub fn sched(
     progconfig: ProgConfig,
     fuzzer_status: &mut FuzzerStatus,
 ) {
-    for _ in 0..10 {
+    for i in 0..100000 {
         let rand = random(seed_queue.len());
 
-        let new_seed = mutate(seed_queue);
+       seed_queue.push_back(mutate(&seed_queue[rand],&seed_queue,fuzzer_status));
+       fuzzer_status.newseed(seed_queue.len());
+       
 
-        exec_fuzz(&mut seed_queue[rand], &progconfig);
-        fuzzer_status.update(seed_queue.len(), &seed_queue[rand].exit_stat);
+       //Proper scheduling
+       let rand = random(seed_queue.len());
+       exec_fuzz(&mut seed_queue[rand], &progconfig);
+       fuzzer_status.update(seed_queue.len(), &seed_queue[rand].exit_stat);
 
+if(i%5000 == 0){
         println!(
             "\n\n
                  -- Fuzzer Status --\n
@@ -32,5 +37,6 @@ pub fn sched(
             &fuzzer_status.crash_count,
             &fuzzer_status.conf_count
         );
+}
     }
 }

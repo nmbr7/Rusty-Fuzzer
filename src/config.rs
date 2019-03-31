@@ -1,4 +1,5 @@
 extern crate chrono;
+use crate::fuzzstat::FuzzerStatus;
 use crate::mutengine::{MutType, Mutation};
 use chrono::{DateTime, Utc};
 use std::collections::hash_map::DefaultHasher;
@@ -47,7 +48,7 @@ impl SeedConfig {
     }
 
     pub fn init_queue(seedfile: &str, input: String) -> std::io::Result<VecDeque<SeedConfig>> {
-        let mut config_queue: VecDeque<SeedConfig> = VecDeque::new();
+        let mut seed_queue: VecDeque<SeedConfig> = VecDeque::new();
         for (id, path) in fs::read_dir(&seedfile)?.enumerate() {
             let file = path.unwrap().path();
             println!("{:?}", file);
@@ -61,9 +62,10 @@ impl SeedConfig {
             let conf = SeedConfig::new(buf, id);
             File::create(format!("{}_FuzzDir/input_set/{}", input, conf.input)).unwrap();
 
-            config_queue.push_back(conf);
+            seed_queue.push_back(conf);
+            //FuzzerStatus::newseed(seed_queue.len());
         }
-        Ok(config_queue)
+        Ok(seed_queue)
     }
 }
 #[derive(Debug, Clone)]

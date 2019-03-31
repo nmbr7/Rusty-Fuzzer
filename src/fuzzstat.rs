@@ -33,9 +33,16 @@ impl FuzzerStatus {
             Stat::CRASH => self.crash_count + 1,
             _ => self.crash_count,
         };
+
         self.queue_len = quelen;
-        self.conf_count += 1;
+        self.test_count += 1;
         self.time_elapsed = self.start_time.1.elapsed();
+        true
+    }
+
+    pub fn newseed(&mut self,quelen: usize ) -> bool {
+        self.conf_count += 1;
+        self.queue_len = quelen;
         true
     }
 }

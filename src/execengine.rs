@@ -33,10 +33,15 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
                 let p = *shmaddr as *const u8;
 
                 for i in 0..4100 {
+                    if *p.add(0)>6{
+            println!("{}",String::from_utf8_unchecked(seed_config.seed.clone()));
+
                     if *p.add(i) > 0 {
                         print!("{} ", *p.add(i));
                     }
                 }
+                }
+
                 shmdt(*shmaddr);
             }
 
@@ -92,9 +97,9 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
             let mut args: Vec<String> = Vec::new();
             args.push(prog_config.inputpath.clone());
             //args.push(seed_config.seed.clone());
-            args.push(String::from_utf8(seed_config.seed.clone()).unwrap());
-            println!("{:?} len {}", args, args.len());
             unsafe {
+            args.push(String::from_utf8_unchecked(seed_config.seed.clone()));
+            println!("{:?} len {}", args, args.len());
                 let output = Command::new(&args[0])
                     .args(&args[1..args.len()])
                     .stdout(/**(Stdio::null())**/
