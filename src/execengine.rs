@@ -1,6 +1,8 @@
 use libc;
 use nix;
 
+use crate::config::{ProgConfig, SeedConfig, Stat};
+use crate::fuzzstat::FuzzerStatus;
 use libc::{c_void, uint8_t};
 use libc::{shmat, shmdt, shmget};
 use nix::sys::wait::waitpid;
@@ -10,9 +12,11 @@ use std::os::unix::process::ExitStatusExt;
 use std::process::{exit, Command, Stdio};
 use std::{env, fmt, format, fs, mem, ptr, str};
 
-use crate::config::{ProgConfig, SeedConfig, Stat};
-
-pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
+pub fn exec_fuzz(
+    seed_config: &mut SeedConfig,
+    prog_config: &ProgConfig,
+    fuzz_status: &mut FuzzerStatus,
+) {
     let fd_d = pipe().unwrap();
     let fd_c = pipe().unwrap();
 
@@ -23,17 +27,20 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
             let mut arr: [u8; 1] = [0; 1];
             close(fd_d.1).unwrap();
             close(fd_c.1).unwrap();
-
+            let mut bitmap: [u8; 4100] = [0; 4100];
             unsafe {
                 let shmid = shmget(701707, 4100, libc::IPC_CREAT);
                 let shmaddr = &shmat(shmid, std::ptr::null_mut(), 0);
                 ptr::write_bytes(*shmaddr, 0, 4100);
-                // println!("shmid {} addr {:?}", shmid, *shmaddr);
-                waitpid(child, None);
                 let p = *shmaddr as *const u8;
+                // println!("shmid {} addr {:?}", shmid, *shmaddr);
+                waitpid(child, None).unwrap();
 
                 for i in 0..4100 {
-                    if *p.add(0) > 6 {
+                    bitmap[i] = *p.add(i);
+                    if *p.add(0) >= fuzz_status.coverage_count.0 {
+                        fuzz_status.coverage_count.0 = *p.add(0);
+                        seed_config.fitness += 1;
                         println!("{}", String::from_utf8_unchecked(seed_config.seed.clone()));
 
                         if *p.add(i) > 0 {
@@ -93,15 +100,15 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
         }
 
         Ok(ForkResult::Child) => {
-            close(fd_d.0);
-            close(fd_c.0);
+            close(fd_d.0).unwrap();
+            close(fd_c.0).unwrap();
             // eprintln!("Inside Child");
             let mut args: Vec<String> = Vec::new();
             args.push(prog_config.inputpath.clone());
             //args.push(seed_config.seed.clone());
             unsafe {
-                args.push(String::from_utf8_unchecked(seed_config.seed.clone()));
-                println!("{:?} len {}", args[1], args.len());
+                args.push(String::from_utf8(seed_config.seed.clone()).unwrap());
+                //                println!("{:?} len {}", args[1], args.len());
                 let output = Command::new(&args[0])
                     .args(&args[1..args.len()])
                     .stdout(/**(Stdio::null())**/

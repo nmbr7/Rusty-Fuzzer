@@ -7,6 +7,7 @@ pub struct FuzzerStatus {
     pub time_elapsed: Duration,
     pub crash_count: u32,
     pub test_count: u32,
+    pub coverage_count: (u8, u8),
     pub conf_count: usize,
     pub queue_len: usize,
     pub valid_crashes: u32,
@@ -25,6 +26,7 @@ impl FuzzerStatus {
             queue_len: conf_count,
             valid_crashes: 0,
             test_count: 0,
+            coverage_count: (0, 0),
         }
     }
 

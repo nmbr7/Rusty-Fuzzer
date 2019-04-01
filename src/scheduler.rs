@@ -10,21 +10,31 @@ pub fn sched(
     progconfig: ProgConfig,
     fuzzer_status: &mut FuzzerStatus,
 ) {
-    for i in 0..100000 {
+    let mut g = 0;
+    for i in 0..1000000 {
         let rand = random(seed_queue.len());
 
+        seed_queue[rand].evolved += 1;
         seed_queue.push_back(mutate(&seed_queue[rand], &seed_queue, fuzzer_status));
         fuzzer_status.newseed(seed_queue.len());
-        //        for i in 0..seed_queue.len() {
-        //          println!(" \nseed : {:?}\n", seed_queue[i]);
-        //    }
+        if (i % 50 == 0) {
+            seed_queue.retain(|x| x.evolved < 2);
+            //seed_queue.remove(rand);
+        }
 
+        if (i % 10000 == 0) {
+            seed_queue.retain(|x| x.gen > g);
+            g += 1;
+        }
+        /**for i in 0..seed_queue.len() {
+                    }
+        **/
         //Proper scheduling
         let rand = random(seed_queue.len());
-        exec_fuzz(&mut seed_queue[rand], &progconfig);
+        exec_fuzz(&mut seed_queue[rand], &progconfig, fuzzer_status);
         fuzzer_status.update(seed_queue.len(), &seed_queue[rand].exit_stat);
 
-        if (i % 5000 == 0) {
+        if (i % 50 == 0) {
             println!(
                 "\n\n
                  -- Fuzzer Status --\n

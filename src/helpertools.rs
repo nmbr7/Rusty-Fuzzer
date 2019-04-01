@@ -6,3 +6,9 @@ pub fn random(n: usize) -> usize {
     let mut rng = rand::thread_rng();
     range.sample(&mut rng)
 }
+
+pub fn random_range(s: usize, n: usize) -> usize {
+    let range = Uniform::from(s..n);
+    let mut rng = rand::thread_rng();
+    range.sample(&mut rng)
+}
