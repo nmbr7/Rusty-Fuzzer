@@ -22,23 +22,27 @@ pub enum MutType {
     BlockRm,
     BlockInsert,
     BlockSwap,
+    BlockShfl,
+    Reverse,
     None,
 }
 
 pub fn mutate(
-    seed_config: &SeedConfig,
-    seed_queue: &VecDeque<SeedConfig>,
+    seed_queue: &mut VecDeque<SeedConfig>,
+    rand: usize,
     fuzzstatus: &mut FuzzerStatus,
 ) -> SeedConfig {
-    let mut buf = seed_config.seed.clone();
+    let mut buf = seed_queue[rand].seed.clone();
     let (buf, mutant) = loop {
-        let (mut buf, mutant) = match random(5) {
-            0 => bit_flip(buf.clone()),
-            1 => nibble_flip(buf.clone()),
-            2 => byte_mod(buf.clone()),
-            3 => hot_values(buf.clone()),
-            4 => block_insert(buf.clone()),
-            5 => ascii_mod(buf.clone()),
+        let (mut buf, mutant) = match random(8) {
+            0 => block_insert(buf.clone()),
+            1 => bit_flip(buf.clone()),
+            2 => nibble_flip(buf.clone()),
+            3 => byte_mod(buf.clone()),
+            4 => hot_values(buf.clone()),
+            5 => block_shuffle(buf.clone()),
+            6 => block_rm(buf.clone()),
+            7 => ascii_mod(buf.clone()),
             _ => panic!("Unknown"),
         };
 
@@ -51,12 +55,12 @@ pub fn mutate(
     };
 
     //    println!("{:?}",buf);
-    let mut seed = SeedConfig::new(buf, fuzzstatus.conf_count + 1, seed_config.gen + 1);
+    let mut seed = SeedConfig::new(buf, fuzzstatus.conf_count + 1, seed_queue[rand].gen + 1);
     seed.mutation = Mutation {
-        parent: seed_config.id,
+        parent: seed_queue[rand].id,
         mutant,
     };
-    seed.fitness = seed_config.fitness;
+    seed.fitness = seed_queue[rand].fitness;
     seed
 }
 
@@ -136,23 +140,36 @@ fn arithmetic(buf: Vec<u8>, len: usize) {}
 fn block_insert(mut buf: Vec<u8>) -> (Vec<u8>, MutType) {
     let pos = random(buf.len());
     for _ in 0..=random(4) {
-        buf.push(random(128) as u8);
+        buf.push(random_range(20, 128) as u8);
     }
-    /**    match [1, 2, 3, 4][random(1)] {
-        1 => buf.push(random(128) as u8),
-
-    2 => {**/
-    /**},
-                                                                     3 => ,
-    4 => ,
-        _ => panic!("Unknown"),
-    };**/
+        if random(3)%2 == 0 {let mut p = &mut buf[..];
+        p.reverse();
+        buf = p.to_vec();}
     (buf, MutType::BlockInsert)
 }
-fn block_rm(buf: Vec<u8>) {}
+
+fn block_rm(mut buf: Vec<u8>) -> (Vec<u8>, MutType)  {
+        let pos = random(buf.len());
+        buf.remove(pos);
+        if random(3)%2 == 0 {let mut p = &mut buf[..];
+        p.reverse();
+        buf = p.to_vec();}
+        (buf, MutType::BlockRm)
+}
+
+fn block_shuffle(mut buf: Vec<u8>) -> (Vec<u8>, MutType) {
+    for _ in 0..=random(2) {
+        let ins = random(buf.len());
+        let rmv = random(buf.len());
+        let temp = buf.remove(rmv);
+        buf.insert(ins, temp);
+        if random(3)%2 == 0 {let mut p = &mut buf[..];
+        p.reverse();
+        buf = p.to_vec();}
+        
+    }
+    (buf, MutType::BlockShfl)
+}
 
 fn block_swap(buf: Vec<u8>) {}
-
-fn block_shuffle(buf: Vec<u8>) {}
-
 fn block_merge(buf: Vec<u8>) {}

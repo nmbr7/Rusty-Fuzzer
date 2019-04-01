@@ -1,7 +1,7 @@
 use crate::config::{ProgConfig, SeedConfig, Stat};
 use crate::execengine::exec_fuzz;
 use crate::fuzzstat::FuzzerStatus;
-use crate::helpertools::random;
+use crate::helpertools::{random, random_range};
 use crate::mutengine::mutate;
 use std::collections::VecDeque;
 
@@ -15,14 +15,18 @@ pub fn sched(
         let rand = random(seed_queue.len());
 
         seed_queue[rand].evolved += 1;
-        seed_queue.push_back(mutate(&seed_queue[rand], &seed_queue, fuzzer_status));
+        let mut_seed = mutate(seed_queue, rand, fuzzer_status);
+        seed_queue.retain(|x| x.seed != mut_seed.seed);
+        seed_queue
+            .retain(|x| !mut_seed.seed.starts_with(&x.seed) && x.seed.len() > random_range(0, 10));
+        seed_queue.push_back(mut_seed);
         fuzzer_status.newseed(seed_queue.len());
-        if (i % 50 == 0) {
-            seed_queue.retain(|x| x.evolved < 2);
+        if (i % 500 == 0) {
+            seed_queue.retain(|x| x.evolved < 3);
             //seed_queue.remove(rand);
         }
 
-        if (i % 10000 == 0) {
+        if (i % 5000 == 0) {
             seed_queue.retain(|x| x.gen > g);
             g += 1;
         }

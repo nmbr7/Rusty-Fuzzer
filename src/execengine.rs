@@ -35,10 +35,9 @@ pub fn exec_fuzz(
                 let p = *shmaddr as *const u8;
                 // println!("shmid {} addr {:?}", shmid, *shmaddr);
                 waitpid(child, None).unwrap();
-
                 for i in 0..4100 {
                     bitmap[i] = *p.add(i);
-                    if *p.add(0) >= fuzz_status.coverage_count.0 {
+                    if *p.add(0) > fuzz_status.coverage_count.0 {
                         fuzz_status.coverage_count.0 = *p.add(0);
                         seed_config.fitness += 1;
                         println!("{}", String::from_utf8_unchecked(seed_config.seed.clone()));
