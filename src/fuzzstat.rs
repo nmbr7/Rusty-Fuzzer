@@ -40,7 +40,7 @@ impl FuzzerStatus {
         true
     }
 
-    pub fn newseed(&mut self,quelen: usize ) -> bool {
+    pub fn newseed(&mut self, quelen: usize) -> bool {
         self.conf_count += 1;
         self.queue_len = quelen;
         true

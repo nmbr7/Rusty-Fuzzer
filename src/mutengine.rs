@@ -1,7 +1,7 @@
+use crate::config::{ProgConfig, SeedConfig, Stat};
+use crate::fuzzstat::FuzzerStatus;
 use crate::helpertools::random;
 use std::collections::VecDeque;
-use crate::fuzzstat::FuzzerStatus;
-use crate::config::{ProgConfig, SeedConfig, Stat};
 
 #[derive(Debug, Clone)]
 pub struct Mutation {
@@ -12,7 +12,8 @@ pub struct Mutation {
 #[derive(Debug, Clone)]
 pub enum MutType {
     BitFlip,
-    NibbleMod,
+    NibbleFlip,
+    ByteMod,
     IntMod,
     AsciiMod,
     HotValues,
@@ -23,84 +24,106 @@ pub enum MutType {
     None,
 }
 
-pub fn mutate(seed_config: &SeedConfig, seed_queue: &VecDeque<SeedConfig>,fuzzstatus: &mut FuzzerStatus) -> SeedConfig {
-    let buf = seed_config.seed.clone();
-    let buf = match random(1) {
+pub fn mutate(
+    seed_config: &SeedConfig,
+    seed_queue: &VecDeque<SeedConfig>,
+    fuzzstatus: &mut FuzzerStatus,
+) -> SeedConfig {
+    let mut buf = seed_config.seed.clone();
+    let (buf, mutant) = match random(5) {
         0 => bit_flip(buf),
-        1 => nibble_mod(buf),
-         _ => panic!("Unknown"),
+        1 => nibble_flip(buf),
+        2 => byte_mod(buf),
+        3 => hot_values(buf),
+        4 => block_insert(buf),
+        _ => panic!("Unknown"),
     };
-//    println!("{:?}",buf);
-    SeedConfig::new(buf.clone(),fuzzstatus.conf_count+1)
+    //    println!("{:?}",buf);
+    let mut seed = SeedConfig::new(buf.clone(), fuzzstatus.conf_count + 1);
+    seed.mutation = Mutation {
+        parent: seed_config.id,
+        mutant,
+    };
+    seed
 }
 
-fn bit_flip(buf: Vec<u8>) -> Vec<u8> {
+fn bit_flip(mut buf: Vec<u8>) -> (Vec<u8>, MutType) {
     let mut buf = buf;
     let pos = random(buf.len());
-    buf[pos] = match random(1) {
-        0 => match random(8) {
-            0 => buf[pos]^0b00000001,
-            1 => buf[pos]^0b00000010,
-            2 => buf[pos]^0b00000100,
-            3 => buf[pos]^0b00001000,
-            4 => buf[pos]^0b00010000,
-            5 => buf[pos]^0b00100000,
-            6 => buf[pos]^0b01000000,
-            7 => buf[pos]^0b10000000,
-            _ => panic!("Unknown"),
-        },
-        1 => match random(7) {
-            0 => buf[pos]^0b00000011,
-            1 => buf[pos]^0b00000110,
-            2 => buf[pos]^0b00001100,
-            3 => buf[pos]^0b00011000,
-            4 => buf[pos]^0b00110000,
-            5 => buf[pos]^0b01100000,
-            6 => buf[pos]^0b11000000,
-            _ => panic!("Unknown"),
-        },
-        2 => match random(6) {
-            0 => buf[pos]^0b00000111,
-            1 => buf[pos]^0b00001110,
-            2 => buf[pos]^0b00011100,
-            3 => buf[pos]^0b00111000,
-            4 => buf[pos]^0b01110000,
-            5 => buf[pos]^0b11100000,
-            _ => panic!("Unknown"),
-        },
-         _ => panic!("Unknown"),
-    };
-    buf
-}
-
-fn nibble_mod(buf: Vec<u8>) -> Vec<u8> {
-    let pos = random(buf.len());
-    match random(9) {
-        0|2|4|6 => match random(2){
-            0 => buf[pos]^0b00001111,
-            1 => buf[pos]^0b11110000,
-            _ => panic!("Unknown"),
-        },
-        1|3|5 => buf[pos]^0b11111111,
-        7|8   => buf[pos]^0b11111111,    //      buf[pos+1]^0b11111111;
+    buf[pos] = match random(3) {
+        //Optimize
+        0 => buf[pos] ^ (1 << (random(pos * 8 + 1) % 8)),
+        1 => buf[pos] ^ (3 << (random(pos * 8 + 1) % 7)),
+        2 => buf[pos] ^ (7 << (random(pos * 8 + 1) % 6)),
         _ => panic!("Unknown"),
-       
     };
-    buf
+    (buf, MutType::BitFlip)
 }
 
+fn nibble_flip(mut buf: Vec<u8>) -> (Vec<u8>, MutType) {
+    let pos = random(buf.len());
+    buf[pos] = match random(7) {
+        0 | 2 | 4 | 6 => buf[pos] ^ (0xf << (random(pos * 8 + 1) % 4)),
+        1 | 3 | 5 => buf[pos] ^ 0xff,
+        _ => panic!("Unknown"),
+    };
 
-fn int_mod(buf: Vec<u8>) {}
+    /**7 | 8 => {
+        buf[pos] ^ 0b11111111,
+        buf[pos+1]^0b11111111
+    }**/
+    (buf, MutType::NibbleFlip)
+}
+
+fn byte_mod(mut buf: Vec<u8>) -> (Vec<u8>, MutType) {
+    let pos = random(buf.len());
+    buf[pos] = random(256) as u8;
+    //A bit more
+    (buf, MutType::ByteMod)
+}
+
+fn int_mod(buf: Vec<u8>) -> (Vec<u8>, MutType) {
+    let pos = random(buf.len());
+    //buf[pos] = ;
+
+    (buf, MutType::IntMod)
+}
 
 fn ascii_mod(buf: Vec<u8>) {}
 
-fn hot_values(buf: Vec<u8>) {}
+fn hot_values(mut buf: Vec<u8>) -> (Vec<u8>, MutType) {
+    let pos = random(buf.len());
+    match random(2) {
+        0 => buf[pos] = 255 as u8,
+        1 => buf[pos] = 0 as u8,
+        _ => panic!("Unknown"),
+    };
+    /**2 => ,
+    3 => ,
+    4 => ,
+    5 => ,
+    6 => ,
+    7 => ,
+    8 => ,
+    9 => ,**/
+    (buf, MutType::HotValues)
+}
 
 fn arithmetic(buf: Vec<u8>, len: usize) {}
 
 fn block_rm(buf: Vec<u8>) {}
 
-fn block_insert(buf: Vec<u8>) {}
+fn block_insert(mut buf: Vec<u8>) -> (Vec<u8>, MutType) {
+    let pos = random(buf.len());
+    match [1, 2, 3, 4][random(1)] {
+        1 => buf.push(random(256) as u8),
+        _ => panic!("Unknown"),
+    };
+    /**2 => ,
+    3 => ,
+    4 => ,**/
+    (buf, MutType::BlockInsert)
+}
 
 fn block_swap(buf: Vec<u8>) {}
 

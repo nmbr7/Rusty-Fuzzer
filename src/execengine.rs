@@ -33,13 +33,13 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
                 let p = *shmaddr as *const u8;
 
                 for i in 0..4100 {
-                    if *p.add(0)>6{
-            println!("{}",String::from_utf8_unchecked(seed_config.seed.clone()));
+                    if *p.add(0) > 6 {
+                        println!("{}", String::from_utf8_unchecked(seed_config.seed.clone()));
 
-                    if *p.add(i) > 0 {
-                        print!("{} ", *p.add(i));
+                        if *p.add(i) > 0 {
+                            print!("{} ", *p.add(i));
+                        }
                     }
-                }
                 }
 
                 shmdt(*shmaddr);
@@ -68,7 +68,7 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
                 control.push(arr[0]);
             }
 
-            if control[0] != 0 && data.len() > 1 {
+            if control[0] == 0 {
                 seed_config.exit_stat = Stat::CRASH;
                 //let c: &[u8] = data.as_slice();
                 //let s: &[u8] = seed_config.seed.as_slice();
@@ -77,9 +77,11 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
                     seed_config.seed.as_slice(),
                 )
                 .unwrap();
+                let s = seed_config.seed.clone();
+
                 fs::write(
                     format!("{}/Crash/{}", prog_config.outputdir, seed_config.output),
-                    data.as_slice(),
+                    s.as_slice(),
                 )
                 .unwrap();
             }
@@ -98,8 +100,8 @@ pub fn exec_fuzz(seed_config: &mut SeedConfig, prog_config: &ProgConfig) {
             args.push(prog_config.inputpath.clone());
             //args.push(seed_config.seed.clone());
             unsafe {
-            args.push(String::from_utf8_unchecked(seed_config.seed.clone()));
-            println!("{:?} len {}", args, args.len());
+                args.push(String::from_utf8_unchecked(seed_config.seed.clone()));
+                println!("{:?} len {}", args[1], args.len());
                 let output = Command::new(&args[0])
                     .args(&args[1..args.len()])
                     .stdout(/**(Stdio::null())**/
