@@ -11,34 +11,36 @@ pub fn sched(
     fuzzer_status: &mut FuzzerStatus,
 ) {
     let mut g = 0;
-    for i in 0..1000000 {
+    let mut i = 0;
+    loop {
         let rand = random(seed_queue.len());
-
+        //for i in 0..10000{
         seed_queue[rand].evolved += 1;
         let mut_seed = mutate(seed_queue, rand, fuzzer_status);
         seed_queue.retain(|x| x.seed != mut_seed.seed);
-        seed_queue
-            .retain(|x| !mut_seed.seed.starts_with(&x.seed) && x.seed.len() > random_range(0, 10));
+        //seed_queue.retain(|x| !mut_seed.seed.starts_with(&x.seed) && x.seed.len() > random_range(3, 10));
         seed_queue.push_back(mut_seed);
         fuzzer_status.newseed(seed_queue.len());
-        if (i % 500 == 0) {
-            seed_queue.retain(|x| x.evolved < 3);
+        if (i % 100 == 0) {
+            seed_queue.retain(|x| x.evolved < 6 );
             //seed_queue.remove(rand);
         }
 
-        if (i % 5000 == 0) {
+        if (i % 2000 == 0) {
+        //    seed_queue.retain(|x| x.fitness  ));
             seed_queue.retain(|x| x.gen > g);
             g += 1;
         }
         /**for i in 0..seed_queue.len() {
                     }
         **/
-        //Proper scheduling
+     //Proper scheduling
         let rand = random(seed_queue.len());
         exec_fuzz(&mut seed_queue[rand], &progconfig, fuzzer_status);
         fuzzer_status.update(seed_queue.len(), &seed_queue[rand].exit_stat);
 
-        if (i % 50 == 0) {
+       // }
+        if (i% 50 == 0) {
             println!(
                 "\n\n
                  -- Fuzzer Status --\n
@@ -54,5 +56,6 @@ pub fn sched(
                 &fuzzer_status.conf_count
             );
         }
+        i +=1;
     }
 }

@@ -35,14 +35,14 @@ pub fn mutate(
     let mut buf = seed_queue[rand].seed.clone();
     let (buf, mutant) = loop {
         let (mut buf, mutant) = match random(8) {
-            0 => block_insert(buf.clone()),
+            0 => ascii_mod(buf.clone()),
             1 => bit_flip(buf.clone()),
             2 => nibble_flip(buf.clone()),
-            3 => byte_mod(buf.clone()),
-            4 => hot_values(buf.clone()),
-            5 => block_shuffle(buf.clone()),
-            6 => block_rm(buf.clone()),
-            7 => ascii_mod(buf.clone()),
+            3 => block_insert(buf.clone()),
+            4 => byte_mod(buf.clone()),
+            5 => hot_values(buf.clone()),
+            6 => block_shuffle(buf.clone()),
+            7 => block_rm(buf.clone()),
             _ => panic!("Unknown"),
         };
 
