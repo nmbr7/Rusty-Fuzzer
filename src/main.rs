@@ -5,12 +5,12 @@ extern crate log;
 extern crate clap;
 
 mod config;
+mod confupdater;
 mod execengine;
 mod fuzzstat;
 mod helpertools;
 mod mutengine;
 mod scheduler;
-//mod configupdater;
 use config::{ProgConfig, SeedConfig};
 use fuzzstat::FuzzerStatus;
 use scheduler::sched;
@@ -33,9 +33,9 @@ fn main() {
     let timeout = args.value_of("TIMEOUT").unwrap_or("30");
     let seed = args.value_of("SEED_FILE_DIR").unwrap();
     let prog_config = ProgConfig::init(input.to_string(), timeout.parse::<u32>().unwrap());
-    let mut conf_queue = SeedConfig::init_queue(seed, prog_config.inputpath.clone()).unwrap();
-    let mut fuzzer_status = FuzzerStatus::init(conf_queue.len());
-    sched(&mut conf_queue, prog_config, &mut fuzzer_status);
+    let mut seed_queue = SeedConfig::init_queue(seed, prog_config.inputpath.clone()).unwrap();
+    let mut fuzzer_status = FuzzerStatus::init(seed_queue.len());
+    sched(&mut seed_queue, prog_config, &mut fuzzer_status);
 
     /* Debug
     for i in 0..conf_queue.len() {

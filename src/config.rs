@@ -20,12 +20,13 @@ pub struct SeedConfig {
     pub gen: usize,
     pub exit_stat: Stat,
     pub fitness: u8,
+    pub newlen: usize,
     pub output: String,
     pub input: String,
 }
 
 impl SeedConfig {
-    pub fn new(seed: Vec<u8>, id: usize, gen: usize) -> Self {
+    pub fn new(seed: Vec<u8>, id: usize, gen: usize,nl: usize) -> Self {
         Self {
             arg_count: seed.len(),
             seed,
@@ -35,6 +36,7 @@ impl SeedConfig {
             },
             id,
             gen,
+            newlen: nl,
             evolved: 0,
             mutation: Mutation {
                 parent: id,
@@ -63,7 +65,7 @@ impl SeedConfig {
             //for line in f.lines() {
             //  seedv.push(line.unwrap());
             // }
-            let conf = SeedConfig::new(buf, id, 0);
+            let conf = SeedConfig::new(buf, id, 0,0);
             File::create(format!("{}_FuzzDir/input_set/{}", input, conf.input)).unwrap();
 
             seed_queue.push_back(conf);

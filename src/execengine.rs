@@ -38,10 +38,16 @@ pub fn exec_fuzz(
                 for i in 0..4100 {
                     bitmap[i] = *p.add(i);
                     if *p.add(0) > fuzz_status.coverage_count.0 {
+                        seed_config.fitness += *p.add(0)-fuzz_status.coverage_count.0;
                         fuzz_status.coverage_count.0 = *p.add(0);
-                        seed_config.fitness += 1;
-                        println!("{}", String::from_utf8_unchecked(seed_config.seed.clone()));
+                        println!(
+                            "First seed {}",
+                            String::from_utf8_unchecked(seed_config.seed.clone())
 
+                        );
+                        if *p.add(0)>4{
+                        seed_config.newlen=seed_config.seed.len();
+                        }
                         if *p.add(i) > 0 {
                             print!("{} ", *p.add(i));
                         }
@@ -73,8 +79,13 @@ pub fn exec_fuzz(
                 len[1] = read(fd_c.0, &mut arr).unwrap();
                 control.push(arr[0]);
             }
+                fs::write(
+                    format!("{}/input_set/{}", prog_config.outputdir, seed_config.input),
+                    seed_config.seed.as_slice(),
+                )
+                .unwrap();
 
-            if control[0] == 0 {
+            if control[0] != 0 && data.as_slice()[0]==0x3d{
                 seed_config.exit_stat = Stat::CRASH;
                 //let c: &[u8] = data.as_slice();
                 //let s: &[u8] = seed_config.seed.as_slice();
@@ -87,7 +98,7 @@ pub fn exec_fuzz(
 
                 fs::write(
                     format!("{}/Crash/{}", prog_config.outputdir, seed_config.output),
-                    s.as_slice(),
+                    data.as_slice(),
                 )
                 .unwrap();
             }
