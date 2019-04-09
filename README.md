@@ -3,7 +3,3 @@ An Evolutionary Fuzzer
 
 
 
-
-
-
-PROJECT STATUS >> UNSTABLE
