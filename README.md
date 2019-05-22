@@ -1,5 +1,7 @@
 # Rusty-Fuzzer
-An Evolutionary Fuzzer
+A Coverage Guided Evolutionary Fuzzer Written in Rust
 
+
+STATUS  : Unstable
 
 
