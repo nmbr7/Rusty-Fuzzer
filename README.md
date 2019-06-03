@@ -19,6 +19,8 @@ curl https://sh.rustup.rs -sSf | sh
 git clone https://github.com/nmbr7/Rusty-Fuzzer.git
 cd Rusty-Fuzzer
 cargo build --release
+cd target/release
+./rusty-fuzzer
 
 ```
 
