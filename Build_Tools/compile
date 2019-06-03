@@ -1,0 +1,2 @@
+clang -g -fsanitize=address -fsanitize-coverage=no-prune,edge,trace-pc-guard shm.cpp -c
+clang++ trace-pc-guard-cb.cc shm.o -fsanitize=address
