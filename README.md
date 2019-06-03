@@ -2,6 +2,11 @@
 
 A Coverage Guided Evolutionary Fuzzer Written in Rust
 -----------------------------------------------------
+*STATUS : Unstable (Experimental)*
 
-STATUS : Unstable (Experimental)
+## # Installation
 
+
+## # How To Run
+
+![Help](/Images/help.png)
