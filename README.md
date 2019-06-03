@@ -1,7 +1,7 @@
-# Rusty-Fuzzer
+# *Rusty-Fuzzer*
+_A Coverage Guided Evolutionary Fuzzer Written in Rust_
 
-A Coverage Guided Evolutionary Fuzzer Written in Rust
------------------------------------------------------
+
 *STATUS :  :x:  Unstable (Experimental)*
 
 ## # Installation
