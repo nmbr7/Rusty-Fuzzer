@@ -6,16 +6,15 @@ A Coverage Guided Evolutionary Fuzzer Written in Rust
 
 ## # Installation
 
-### Rust Programming language
-
-[Install Rust](https://www.rust-lang.org/tools/install)
-#### or
-#### In Unix-like OS: 
+### Installing Rust Programming language
+#### _In Unix-like OS:_ 
 ```
 curl https://sh.rustup.rs -sSf | sh
 ```
 
-### Rusty-Fuzzer
+**OR** [visit official _Rust_ website ](https://www.rust-lang.org/tools/install)
+
+### Installing Rusty-Fuzzer
 ```
 git clone https://github.com/nmbr7/Rusty-Fuzzer.git
 cd Rusty-Fuzzer
