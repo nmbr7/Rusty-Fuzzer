@@ -2,7 +2,7 @@
 __A Coverage Guided Evolutionary Fuzzer Written in Rust__
 
 
-*_STATUS :  :x:  Unstable (Experimental)_*
+*_STATUS :  :negative_squared_cross_mark:  Unstable_*
 
 ## # Installation
 
@@ -12,7 +12,7 @@ __A Coverage Guided Evolutionary Fuzzer Written in Rust__
 curl https://sh.rustup.rs -sSf | sh
 ```
 
-**OR** [visit official _Rust_ website ](https://www.rust-lang.org/tools/install)
+**OR** [visit official _**Rust**_ website ](https://www.rust-lang.org/tools/install)
 
 ### Building and Running Rusty-Fuzzer
 1) Building from git source
@@ -28,3 +28,10 @@ cd target/release
 ```
 <img src="/Images/help.png" width=70% height=70% >
 
+## # Notes
+This program has only been tested on a Linux (Arch linux) system.
+It should build and run on all other linux and unix-like systems, though it is not guaranteed. 
+
+:bangbang: The Fuzzer is currently experimental.
+
+**Other details related to binary instrumentations will be updated shortly** 
