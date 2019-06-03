@@ -2,7 +2,7 @@
 
 A Coverage Guided Evolutionary Fuzzer Written in Rust
 -----------------------------------------------------
-*STATUS :  `:x:`  Unstable (Experimental)*
+*STATUS :  :x:  Unstable (Experimental)*
 
 ## # Installation
 
