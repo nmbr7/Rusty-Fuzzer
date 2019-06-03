@@ -9,4 +9,4 @@ A Coverage Guided Evolutionary Fuzzer Written in Rust
 
 ## # How To Run
 
-![Help](/Images/help.png)
+![](/Images/help.png =250x250)
