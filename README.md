@@ -14,16 +14,17 @@ curl https://sh.rustup.rs -sSf | sh
 
 **OR** [visit official _Rust_ website ](https://www.rust-lang.org/tools/install)
 
-### Installing Rusty-Fuzzer
+### Building and Running Rusty-Fuzzer
+1) Building from git source
 ```
 git clone https://github.com/nmbr7/Rusty-Fuzzer.git
 cd Rusty-Fuzzer
 cargo build --release
+```
+2) Running the fuzzer
+```
 cd target/release
 ./rusty-fuzzer
-
 ```
-
-## # How To Run
 <img src="/Images/help.png" width=70% height=70% >
 
