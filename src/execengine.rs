@@ -31,25 +31,26 @@ pub fn exec_fuzz(
             unsafe {
                 let shmid = shmget(701707, 4100, libc::IPC_CREAT);
                 let shmaddr = &shmat(shmid, std::ptr::null_mut(), 0);
+                //println!("First seed {}",String::from_utf8_unchecked(seed_config.seed.clone()));
+                //println!("shmid {} addr {:?}", shmid, *shmaddr);
                 ptr::write_bytes(*shmaddr, 0, 4100);
                 let p = *shmaddr as *const u8;
-                // println!("shmid {} addr {:?}", shmid, *shmaddr);
                 waitpid(child, None).unwrap();
                 for i in 0..4100 {
                     bitmap[i] = *p.add(i);
                     if *p.add(0) > fuzz_status.coverage_count.0 {
                         seed_config.fitness += *p.add(0)-fuzz_status.coverage_count.0;
                         fuzz_status.coverage_count.0 = *p.add(0);
-                        println!(
+                        /*println!(
                             "First seed {}",
                             String::from_utf8_unchecked(seed_config.seed.clone())
 
-                        );
+                        );*/
                         if *p.add(0)>4{
                         seed_config.newlen=seed_config.seed.len();
                         }
                         if *p.add(i) > 0 {
-                            print!("{} ", *p.add(i));
+                            //print!("{} ", *p.add(i));
                         }
                     }
                 }
@@ -79,6 +80,8 @@ pub fn exec_fuzz(
                 len[1] = read(fd_c.0, &mut arr).unwrap();
                 control.push(arr[0]);
             }
+            //println!("First seed {:?}",String::from_utf8(seed_config.seed.clone()));
+                  
                 fs::write(
                     format!("{}/input_set/{}", prog_config.outputdir, seed_config.input),
                     seed_config.seed.as_slice(),
@@ -118,7 +121,7 @@ pub fn exec_fuzz(
             //args.push(seed_config.seed.clone());
             unsafe {
                 args.push(String::from_utf8(seed_config.seed.clone()).unwrap());
-                //                println!("{:?} len {}", args[1], args.len());
+                //println!("{:?} len {}", args[1], args.len());
                 let output = Command::new(&args[0])
                     .args(&args[1..args.len()])
                     .stdout(/**(Stdio::null())**/

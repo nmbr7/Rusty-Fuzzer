@@ -40,7 +40,7 @@ pub fn sched(
         conf_update(seed_queue, fuzzer_status, &i, &mut g);
 
         // Fuzzer status output
-        if (i % 50 == 0) {
+     //   if (i % 50 == 0) {
             println!(
                 "\n\n
                  -- Fuzzer Status --\n
@@ -57,7 +57,7 @@ pub fn sched(
                 &fuzzer_status.conf_count,
                 &fuzzer_status.coverage_count.0,
             );
-        }
+       // }
 
         i += 1;
     }
