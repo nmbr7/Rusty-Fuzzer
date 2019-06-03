@@ -82,11 +82,15 @@ pub fn exec_fuzz(
             }
             //println!("First seed {:?}",String::from_utf8(seed_config.seed.clone()));
                   
+                /*
+
                 fs::write(
                     format!("{}/input_set/{}", prog_config.outputdir, seed_config.input),
                     seed_config.seed.as_slice(),
                 )
                 .unwrap();
+
+                */
 
             if control[0] != 0 && data.as_slice()[0]==0x3d{
                 seed_config.exit_stat = Stat::CRASH;

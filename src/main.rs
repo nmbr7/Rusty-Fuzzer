@@ -19,13 +19,13 @@ use std::io::prelude::*;
 use std::io::{self, BufReader};
 
 fn main() {
-    let args = clap_app!(fuzzer =>
+    let args = clap_app!(rusty_fuzzer =>
     (version: env!("CARGO_PKG_VERSION"))
     (author: env!("CARGO_PKG_AUTHORS"))
     (about: "A grey box evolutionary fuzzer")
     (@arg SEED_FILE_DIR: -s --seed +takes_value +required "Seed directory to use")
     (@arg INPUT_FILE: -i --input +takes_value +required "Input file name")
-    (@arg TIMEOUT: -l --limit +takes_value "Execution timeout limit")
+    //(@arg TIMEOUT: -l --limit +takes_value "Execution timeout limit")
     )
     .get_matches();
 
