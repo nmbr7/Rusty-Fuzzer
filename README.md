@@ -1,5 +1,5 @@
 # **Rusty-Fuzzer**
-_A Coverage Guided Evolutionary Fuzzer Written in Rust_
+__A Coverage Guided Evolutionary Fuzzer Written in Rust__
 
 
 *_STATUS :  :x:  Unstable (Experimental)_*
