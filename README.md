@@ -34,4 +34,4 @@ It should build and run on all other linux and unix-like systems, though it is n
 
 :bangbang: The Fuzzer is currently experimental.
 
-**Other details related to binary instrumentations will be updated shortly** 
+_**This documentation is not complete, and other details related to binary instrumentations and fuzzing a binary will be updated shortly**_ 
