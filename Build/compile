@@ -1,2 +1,7 @@
-clang -g -fsanitize=address -fsanitize-coverage=no-prune,edge,trace-pc-guard shm.cpp -c
-clang++ trace-pc-guard-cb.cc shm.o -fsanitize=address
+#!/bin/sh
+
+
+prog=$1
+echo Instrumenting $prog
+clang -g -fsanitize=address -fsanitize-coverage=no-prune,edge,trace-pc-guard $prog -c -o inst_out.o
+clang++ trace-pc-guard-cb.cc inst_out.o -fsanitize=address
