@@ -1,6 +1,9 @@
 use libc;
 use nix;
 
+use std::thread::sleep;
+use std::time::{Duration, SystemTime};
+
 use crate::config::{ProgConfig, SeedConfig, Stat};
 use crate::fuzzstat::FuzzerStatus;
 use libc::{c_void, uint8_t};
@@ -29,25 +32,27 @@ pub fn exec_fuzz(
             close(fd_c.1).unwrap();
             let mut bitmap: [u8; 4100] = [0; 4100];
             unsafe {
-                let shmid = shmget(701707, 4100, libc::IPC_CREAT);
+                let shmid = shmget(7015, 4100, 0644 | libc::IPC_CREAT);
                 let shmaddr = &shmat(shmid, std::ptr::null_mut(), 0);
                 //println!("First seed {}",String::from_utf8_unchecked(seed_config.seed.clone()));
-                //println!("shmid {} addr {:?}", shmid, *shmaddr);
+                // println!("shmid {} addr {:?}", shmid, *shmaddr);
                 ptr::write_bytes(*shmaddr, 0, 4100);
                 let p = *shmaddr as *const u8;
                 waitpid(child, None).unwrap();
                 for i in 0..4100 {
                     bitmap[i] = *p.add(i);
                     if *p.add(0) > fuzz_status.coverage_count.0 {
-                        seed_config.fitness += *p.add(0)-fuzz_status.coverage_count.0;
+                        seed_config.fitness += *p.add(0) - fuzz_status.coverage_count.0;
                         fuzz_status.coverage_count.0 = *p.add(0);
                         /*println!(
-                            "First seed {}",
-                            String::from_utf8_unchecked(seed_config.seed.clone())
+                            "First seed {}\n{:?}",
+                            String::from_utf8_unchecked(seed_config.seed.clone()),
+                            seed_config.clone()
 
                         );*/
-                        if *p.add(0)>4{
-                        seed_config.newlen=seed_config.seed.len();
+                        // sleep(Duration::new(2, 0));
+                        if *p.add(0) > 4 {
+                            seed_config.newlen = seed_config.seed.len();
                         }
                         if *p.add(i) > 0 {
                             //print!("{} ", *p.add(i));
@@ -81,30 +86,30 @@ pub fn exec_fuzz(
                 control.push(arr[0]);
             }
             //println!("First seed {:?}",String::from_utf8(seed_config.seed.clone()));
-                  
-                /*
 
-                fs::write(
-                    format!("{}/input_set/{}", prog_config.outputdir, seed_config.input),
-                    seed_config.seed.as_slice(),
-                )
-                .unwrap();
+            /*
 
-                */
+            fs::write(
+                format!("{}/input_set/{}", prog_config.outputdir, seed_config.input),
+                seed_config.seed.as_slice(),
+            )
+            .unwrap();
 
-            if control[0] != 0 && data.as_slice()[0]==0x3d{
+            */
+
+            if control[0] != 0 && data.as_slice()[0] == 0x3d {
                 seed_config.exit_stat = Stat::CRASH;
                 //let c: &[u8] = data.as_slice();
                 //let s: &[u8] = seed_config.seed.as_slice();
                 fs::write(
-                    format!("{}/Crash/{}", prog_config.outputdir, seed_config.input),
+                    format!("{}/Crash/{}", prog_config.outputdir, seed_config.inputf),
                     seed_config.seed.as_slice(),
                 )
                 .unwrap();
                 let s = seed_config.seed.clone();
 
                 fs::write(
-                    format!("{}/Crash/{}", prog_config.outputdir, seed_config.output),
+                    format!("{}/Crash/{}", prog_config.outputdir, seed_config.outputf),
                     data.as_slice(),
                 )
                 .unwrap();
@@ -121,7 +126,7 @@ pub fn exec_fuzz(
             close(fd_c.0).unwrap();
             // eprintln!("Inside Child");
             let mut args: Vec<String> = Vec::new();
-            args.push(prog_config.inputpath.clone());
+            args.push(prog_config.prog_name.clone());
             //args.push(seed_config.seed.clone());
             unsafe {
                 args.push(String::from_utf8(seed_config.seed.clone()).unwrap());
@@ -146,4 +151,6 @@ pub fn exec_fuzz(
         }
         Err(_) => println!("Fork failed"),
     }
+    //          println!("{:?}",seed_config);
+    //            sleep(Duration::new(2, 0));
 }

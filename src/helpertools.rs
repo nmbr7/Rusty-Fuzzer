@@ -8,6 +8,9 @@ pub fn random(n: usize) -> usize {
 }
 
 pub fn random_range(s: usize, n: usize) -> usize {
+    if s >= n {
+        panic!("Error random");
+    }
     let range = Uniform::from(s..n);
     let mut rng = rand::thread_rng();
     range.sample(&mut rng)

@@ -19,30 +19,35 @@ pub fn sched(
         seed_queue[rand].evolved += 1;
 
         //mutate the seed
-        let mut_seed = mutate(seed_queue, rand, fuzzer_status);
-        seed_queue.retain(|x| x.seed != mut_seed.seed);
-        seed_queue.push_back(mut_seed);
+        let mut mut_seed = mutate(seed_queue, rand, fuzzer_status);
 
         //update queue length in fuzzer status struct
-        fuzzer_status.newseed(seed_queue.len());
 
         //Proper scheduling
 
-        let rand = random(seed_queue.len());
+        //        let rand = random(seed_queue.len());
 
         //execute the test target
-        exec_fuzz(&mut seed_queue[rand], &progconfig, fuzzer_status);
-
+        //exec_fuzz(&mut seed_queue[rand], &progconfig, fuzzer_status);
+        exec_fuzz(&mut mut_seed, &progconfig, fuzzer_status);
+        //println!("\nOUTSIDE\n{:?}",&mut_seed.fitness);
+        if mut_seed.fitness > 0 {
+            mut_seed.seed_queue_update(seed_queue, progconfig.prog_name.clone());
+            fuzzer_status.newseed(seed_queue.len());
+            //seed_queue.retain(|x| x.seed != mut_seed.seed);
+            //  println!("\nINSIDE{:?}",mut_seed);
+            //  println!("\nQUEUE\n{:?}",seed_queue);
+        }
         //update the fuzzer status
         fuzzer_status.update(seed_queue.len(), &seed_queue[rand].exit_stat);
 
         //update config queue
-        conf_update(seed_queue, fuzzer_status, &i, &mut g);
+        //conf_update(seed_queue, fuzzer_status, i, &mut g);
 
         // Fuzzer status output
-     //   if (i % 50 == 0) {
-            println!(
-                "\n\n
+        //   if (i % 50 == 0) {
+        println!(
+            "\n\n
                  -- Fuzzer Status --\n
                  Start Time     : {:?}\n
                  Time Elapsed   : {:?}\n
@@ -50,14 +55,14 @@ pub fn sched(
                  Crash Count    : {}\n
                  Configs Tested : {}\n
                  Coverage Count : {}",
-                &fuzzer_status.start_time.0,
-                &fuzzer_status.time_elapsed,
-                &fuzzer_status.queue_len,
-                &fuzzer_status.crash_count,
-                &fuzzer_status.conf_count,
-                &fuzzer_status.coverage_count.0,
-            );
-       // }
+            &fuzzer_status.start_time.0,
+            &fuzzer_status.time_elapsed,
+            &fuzzer_status.queue_len,
+            &fuzzer_status.crash_count,
+            &fuzzer_status.conf_count,
+            &fuzzer_status.coverage_count.0,
+        );
+        // }
 
         i += 1;
     }

@@ -12,7 +12,7 @@ struct shmstr {
     uint32_t buf[1024];
 
 };
-int shmid = shmget(701707,4100,0644|IPC_CREAT);
+int shmid = shmget(7015,4100,0644|IPC_CREAT);
 struct shmstr *shmaddr = (struct shmstr*)shmat(shmid,NULL,0);
 // This callback is inserted by the compiler as a module constructor
 // into every DSO. 'start' and 'stop' correspond to the

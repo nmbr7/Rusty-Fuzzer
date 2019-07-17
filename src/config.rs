@@ -11,9 +11,10 @@ use std::time::{Duration, Instant, SystemTime};
 
 #[derive(Debug, Clone)]
 pub struct SeedConfig {
-    pub arg_count: usize,
-    pub id: usize,
     pub seed: Vec<u8>,
+    pub seed_len: usize,
+    pub id: usize,
+    pub seedfile: String,
     pub time: ExecTime,
     pub mutation: Mutation,
     pub evolved: usize,
@@ -21,15 +22,16 @@ pub struct SeedConfig {
     pub exit_stat: Stat,
     pub fitness: u8,
     pub newlen: usize,
-    pub output: String,
-    pub input: String,
+    pub outputf: String,
+    pub inputf: String,
 }
 
 impl SeedConfig {
-    pub fn new(seed: Vec<u8>, id: usize, gen: usize,nl: usize) -> Self {
+    pub fn new(seedfile: String, seed: Vec<u8>, id: usize, gen: usize, nl: usize) -> Self {
         Self {
-            arg_count: seed.len(),
+            seed_len: seed.len(),
             seed,
+            seedfile,
             time: ExecTime {
                 limit: 0,
                 total: [].to_vec(),
@@ -44,8 +46,8 @@ impl SeedConfig {
             },
             exit_stat: Stat::NONE,
             fitness: 0,
-            output: format!("crash_{}", id),
-            input: format!("seed_{}", id),
+            outputf: format!("crash_{}", id),
+            inputf: format!("seed_{}", id),
         }
     }
 
@@ -53,25 +55,36 @@ impl SeedConfig {
         Ok(())
     }
 
-    pub fn init_queue(seedfile: &str, input: String) -> std::io::Result<VecDeque<SeedConfig>> {
+    pub fn init_queue(
+        seedfile: &str,
+        prog: String,
+        intype: &str,
+    ) -> std::io::Result<VecDeque<SeedConfig>> {
         let mut seed_queue: VecDeque<SeedConfig> = VecDeque::new();
+
         for (id, path) in fs::read_dir(&seedfile)?.enumerate() {
             let file = path.unwrap().path();
-            println!("{:?}", file);
-            let mut f = File::open(file)?;
+            println!("Seed file name :{:?}", file);
+            let mut f = File::open(&file)?;
             let mut buf = Vec::new();
-            //let mut seedv: Vec<String> = Vec::new();
             f.read_to_end(&mut buf)?;
-            //for line in f.lines() {
-            //  seedv.push(line.unwrap());
-            // }
-            let conf = SeedConfig::new(buf, id, 0,0);
-            File::create(format!("{}_FuzzDir/input_set/{}", input, conf.input)).unwrap();
+            let conf = SeedConfig::new(file.to_str().unwrap().to_string(), buf.clone(), id, 0, 0);
 
+            let mut writefile =
+                File::create(format!("{}_FuzzDir/input_set/{}", prog, conf.inputf)).unwrap();
+            writefile.write_all(String::from_utf8(buf).unwrap().as_bytes());
             seed_queue.push_back(conf);
+            //println!("First seed {}",String::from_utf8_unchecked(seed_config.seed.clone()));
             //FuzzerStatus::newseed(seed_queue.len());
         }
         Ok(seed_queue)
+    }
+
+    pub fn seed_queue_update(&self, seedq: &mut VecDeque<SeedConfig>, prog: String) {
+        seedq.push_back(self.clone());
+        let mut writefile =
+            File::create(format!("{}_FuzzDir/input_set/{}", prog, &self.inputf)).unwrap();
+        writefile.write_all(String::from_utf8(self.seed.clone()).unwrap().as_bytes());
     }
 }
 #[derive(Debug, Clone)]
@@ -95,20 +108,65 @@ pub enum Stat {
 }
 #[derive(Debug, Clone)]
 pub struct ProgConfig {
-    pub inputpath: String,
+    pub prog_name: String,
+    pub prog_args: String,
     pub outputdir: String,
+    pub inputtype: String,
     pub timeout: u32,
 }
 
 impl ProgConfig {
-    pub fn init(inputpath: String, limit: u32) -> Self {
-        fs::create_dir_all(format!("{}_FuzzDir/Crash", inputpath)).unwrap();
-        fs::create_dir_all(format!("{}_FuzzDir/input_set", inputpath)).unwrap();
-        File::create(format!("{}_FuzzDir/log", inputpath)).unwrap();
+    pub fn init(inputcommand: String, limit: u32, inputtype: String) -> Self {
+        let prog_name = &inputcommand.splitn(2, ' ').collect::<Vec<&str>>()[0].to_string();
+        fs::create_dir_all(format!("{}_FuzzDir/Crash", prog_name)).unwrap();
+        fs::create_dir_all(format!("{}_FuzzDir/input_set", prog_name)).unwrap();
+        File::create(format!("{}_FuzzDir/log", prog_name)).unwrap();
         Self {
-            inputpath: inputpath.clone(),
-            outputdir: format!("{}_FuzzDir", inputpath),
+            prog_name: prog_name.clone(),
+            prog_args: inputcommand,
+            outputdir: format!("{}_FuzzDir", prog_name),
             timeout: limit,
+            inputtype: inputtype.clone(),
         }
     }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::env;
+    use std::path::Path;
+
+    fn test_init() {
+        let cr = env::current_dir().unwrap();
+        let cdir = format!("{}/test_output_dir/seed", cr.display());
+        println!("Current directory is {:?}", cr);
+        fs::create_dir_all(&cdir);
+        let cdir = format!("{}/test_output_dir", cr.display());
+        assert!(env::set_current_dir(&cdir).is_ok());
+        let cr = env::current_dir().unwrap();
+        println!("Current directory is {:?}", cr);
+    }
+
+    fn test_cleanup() {
+        let cr = env::current_dir().unwrap();
+        println!("Current directory is {:?}", cr);
+        fs::remove_dir_all(format!("{}/test_output_dir", cr.display()));
+    }
+
+    #[test]
+    fn test_prog_and_seed_config() {
+        test_init();
+        let prog_config =
+            ProgConfig::init("ls -la -p -q -w @ name".to_string(), 10, "f".to_string());
+        println!("\n{:?}\n", prog_config);
+        let mut seed_queue = SeedConfig::init_queue(
+            &"seed".to_string(),
+            prog_config.prog_name.clone(),
+            &prog_config.inputtype.clone(),
+        )
+        .unwrap();
+        println!("\n{:?}\n", seed_queue);
+    }
+
 }

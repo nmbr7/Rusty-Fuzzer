@@ -24,16 +24,24 @@ fn main() {
     (author: env!("CARGO_PKG_AUTHORS"))
     (about: "A grey box evolutionary fuzzer")
     (@arg SEED_FILE_DIR: -s --seed +takes_value +required "Seed directory to use")
-    (@arg INPUT_FILE: -i --input +takes_value +required "Input file name")
+    (@arg INPUT_COMMAND: -i --input +takes_value +required "Input program and arguments where the argument to be fuzzed is specified by '@'")
     //(@arg TIMEOUT: -l --limit +takes_value "Execution timeout limit")
+    (@arg INPUT_TYPE: -t --inputtype +takes_value "Input type taken by the program (FileInput(f) or command line TextInput(c))")
     )
     .get_matches();
 
-    let input = args.value_of("INPUT_FILE").unwrap();
+    let inputcommand = args.value_of("INPUT_COMMAND").unwrap();
     let timeout = args.value_of("TIMEOUT").unwrap_or("30");
-    let seed = args.value_of("SEED_FILE_DIR").unwrap();
-    let prog_config = ProgConfig::init(input.to_string(), timeout.parse::<u32>().unwrap());
-    let mut seed_queue = SeedConfig::init_queue(seed, prog_config.inputpath.clone()).unwrap();
+    let seedfile_dir = args.value_of("SEED_FILE_DIR").unwrap();
+    let intype = args.value_of("INPUT_TYPE").unwrap();
+
+    let prog_config = ProgConfig::init(
+        inputcommand.trim_start().to_string(),
+        timeout.parse::<u32>().unwrap(),
+        intype.to_string(),
+    );
+    let mut seed_queue =
+        SeedConfig::init_queue(seedfile_dir, prog_config.prog_name.clone(), intype).unwrap();
     let mut fuzzer_status = FuzzerStatus::init(seed_queue.len());
     sched(&mut seed_queue, prog_config, &mut fuzzer_status);
 
