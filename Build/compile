@@ -3,5 +3,9 @@
 
 prog=$1
 echo Instrumenting $prog
-clang -g -fsanitize=address -fsanitize-coverage=no-prune,edge,trace-pc-guard $prog -c -o inst_out.o
-clang++ trace-pc-guard-cb.cc inst_out.o -fsanitize=address
+count=$#
+for i in $@;do
+    count=$(($count-1))
+    clang -g -fsanitize=address -fsanitize-coverage=no-prune,edge,trace-pc-guard $i -c -o inst_out$count.o
+done
+clang trace-pc-guard-cb.cc inst_out* -fsanitize=address
