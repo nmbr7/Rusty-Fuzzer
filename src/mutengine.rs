@@ -44,9 +44,9 @@ pub fn mutate(
         len -= 2;
     }
     let (buf, mutant) = loop {
-        let (mut buf, mutant) = match random(6) {
-            0 => ascii_mod(len, buf.clone()),
-            1 => bit_flip(len, buf.clone()),
+        let (mut buf, mutant) = match random(8) {
+            1 => ascii_mod(len, buf.clone()),
+            0 => bit_flip(len, buf.clone()),
             2 => nibble_flip(len, buf.clone()),
             3 => block_insert(len, buf.clone()),
             4 => byte_mod(len, buf.clone()),
@@ -57,7 +57,7 @@ pub fn mutate(
         };
 
         //buf.retain(|&x| x.is_ascii_alphanumeric());
-        buf.retain(|&x| x.is_ascii_digit());
+        //        buf.retain(|&x| x.is_ascii_digit());
 
         //      if buf.bytes().all(|b| b.unwrap().is_as`cii_alphanumeric()) {
         if !buf.is_empty() {

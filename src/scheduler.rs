@@ -12,9 +12,9 @@ pub fn sched(
     fuzzer_status: &mut FuzzerStatus,
 ) {
     let mut g = 0;
-    let mut i = 0;
+    let mut exec = 0;
     loop {
-        //for i in 0..10000{
+        //for /i in 0..10000{
         let rand = random(seed_queue.len());
         seed_queue[rand].evolved += 1;
 
@@ -29,8 +29,14 @@ pub fn sched(
 
         //execute the test target
         //exec_fuzz(&mut seed_queue[rand], &progconfig, fuzzer_status);
+        mut_seed.new_seed_file(progconfig.prog_name.clone());
         exec_fuzz(&mut mut_seed, &progconfig, fuzzer_status);
-        //println!("\nOUTSIDE\n{:?}",&mut_seed.fitness);
+        unsafe {
+            println!(
+                "Seed {}",
+                String::from_utf8_unchecked(mut_seed.seed.clone())
+            );
+        }
         if mut_seed.fitness > 0 {
             mut_seed.seed_queue_update(seed_queue, progconfig.prog_name.clone());
             fuzzer_status.newseed(seed_queue.len());
@@ -46,24 +52,28 @@ pub fn sched(
 
         // Fuzzer status output
         //   if (i % 50 == 0) {
-        println!(
-            "\n\n
+        if (fuzzer_status.time_elapsed.as_secs() > 0) {
+            println!(
+                "\n\n
                  -- Fuzzer Status --\n
                  Start Time     : {:?}\n
                  Time Elapsed   : {:?}\n
                  Queue Length   : {}\n
                  Crash Count    : {}\n
                  Configs Tested : {}\n
-                 Coverage Count : {}",
-            &fuzzer_status.start_time.0,
-            &fuzzer_status.time_elapsed,
-            &fuzzer_status.queue_len,
-            &fuzzer_status.crash_count,
-            &fuzzer_status.conf_count,
-            &fuzzer_status.coverage_count.0,
-        );
+                 Coverage Count : {}\n
+                 Exec rate      : {}/sec\n",
+                &fuzzer_status.start_time.0,
+                &fuzzer_status.time_elapsed,
+                &fuzzer_status.queue_len,
+                &fuzzer_status.crash_count,
+                &exec, //&fuzzer_status.conf_count,
+                &fuzzer_status.coverage_count.0,
+                exec / fuzzer_status.time_elapsed.as_secs(),
+            );
+        }
         // }
 
-        i += 1;
+        exec += 1;
     }
 }

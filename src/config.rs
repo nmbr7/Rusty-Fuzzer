@@ -72,7 +72,9 @@ impl SeedConfig {
 
             let mut writefile =
                 File::create(format!("{}_FuzzDir/input_set/{}", prog, conf.inputf)).unwrap();
-            writefile.write_all(String::from_utf8(buf).unwrap().as_bytes());
+            unsafe {
+                writefile.write_all(String::from_utf8_unchecked(buf).as_bytes());
+            }
             seed_queue.push_back(conf);
             //println!("First seed {}",String::from_utf8_unchecked(seed_config.seed.clone()));
             //FuzzerStatus::newseed(seed_queue.len());
@@ -80,11 +82,20 @@ impl SeedConfig {
         Ok(seed_queue)
     }
 
+    pub fn new_seed_file(&self, prog: String) {
+        let mut writefile = File::create(format!("{}_FuzzDir/current_seed", prog)).unwrap();
+        unsafe {
+            writefile.write_all(String::from_utf8_unchecked(self.seed.clone()).as_bytes());
+        }
+    }
+
     pub fn seed_queue_update(&self, seedq: &mut VecDeque<SeedConfig>, prog: String) {
         seedq.push_back(self.clone());
         let mut writefile =
             File::create(format!("{}_FuzzDir/input_set/{}", prog, &self.inputf)).unwrap();
-        writefile.write_all(String::from_utf8(self.seed.clone()).unwrap().as_bytes());
+        unsafe {
+            writefile.write_all(String::from_utf8_unchecked(self.seed.clone()).as_bytes());
+        }
     }
 }
 #[derive(Debug, Clone)]
@@ -121,6 +132,7 @@ impl ProgConfig {
         fs::create_dir_all(format!("{}_FuzzDir/Crash", prog_name)).unwrap();
         fs::create_dir_all(format!("{}_FuzzDir/input_set", prog_name)).unwrap();
         File::create(format!("{}_FuzzDir/log", prog_name)).unwrap();
+        File::create(format!("{}_FuzzDir/current_seed", prog_name)).unwrap();
         Self {
             prog_name: prog_name.clone(),
             prog_args: inputcommand,

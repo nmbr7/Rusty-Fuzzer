@@ -42,7 +42,7 @@ pub fn exec_fuzz(
                 for i in 0..4100 {
                     bitmap[i] = *p.add(i);
                     if *p.add(0) > fuzz_status.coverage_count.0 {
-                        seed_config.fitness += *p.add(0) - fuzz_status.coverage_count.0;
+                        seed_config.fitness += *p.add(0); // - fuzz_status.coverage_count.1;
                         fuzz_status.coverage_count.0 = *p.add(0);
                         /*println!(
                             "First seed {}\n{:?}",
@@ -60,6 +60,15 @@ pub fn exec_fuzz(
                     }
                 }
 
+                /*println!("\n");
+                                for i in 0..4100 {
+                                    if *p.add(i) > 0
+                                    {
+                                        println!("Id {} :{}",i,*p.add(i));
+                                    }
+                                }
+                                println!("\n");
+                */
                 shmdt(*shmaddr);
             }
 
@@ -125,16 +134,16 @@ pub fn exec_fuzz(
             close(fd_d.0).unwrap();
             close(fd_c.0).unwrap();
             // eprintln!("Inside Child");
-            let mut args: Vec<String> = Vec::new();
-            args.push(prog_config.prog_name.clone());
-            //args.push(seed_config.seed.clone());
+            let mut args: Vec<&str> = prog_config.prog_args.split(' ').collect();
+            //let a : Vec<&str> = Vec::new();
+            // a.push(prog_config.prog_name.clone());
+            //a.push(seed_config.seed.clone());
             unsafe {
-                args.push(String::from_utf8(seed_config.seed.clone()).unwrap());
+                //args.push(String::from_utf8(seed_config.seed.clone()).unwrap());
                 //println!("{:?} len {}", args[1], args.len());
                 let output = Command::new(&args[0])
                     .args(&args[1..args.len()])
-                    .stdout(/**(Stdio::null())**/
-                    Stdio::from_raw_fd(fd_d.1))
+                    .stdout((Stdio::null()) /*Stdio::from_raw_fd(fd_d.1)*/)
                     .stderr(Stdio::from_raw_fd(fd_d.1))
                     .status()
                     .expect("Failed to execute process");
