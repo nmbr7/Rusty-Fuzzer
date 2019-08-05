@@ -1,11 +1,17 @@
 #!/bin/sh
+#A script to instrument a program using clang
 
+if [[ `clang-8 --version|grep version |egrep ' 8.'` >/dev/null ]];then
+    
+    count=$#
+    for i in $@;do
+        count=$(($count-1))
+        clang -g -fsanitize=address -fsanitize-coverage=no-prune,edge,trace-pc-guard $i -c -o i_out$count.o
+    done
+    clang trace-pc-guard-cb.cc i_out* -fsanitize=address
+    rm i_out*.o
 
-prog=$1
-echo Instrumenting $prog
-count=$#
-for i in $@;do
-    count=$(($count-1))
-    clang -g -fsanitize=address -fsanitize-coverage=no-prune,edge,trace-pc-guard $i -c -o inst_out$count.o
-done
-clang trace-pc-guard-cb.cc inst_out* -fsanitize=address
+else
+    echo "Require clang version higher than 6.0"
+    exit
+fi
