@@ -1,8 +1,20 @@
-# **Rusty-Fuzzer**
-__A Coverage Guided Evolutionary Fuzzer Written in Rust__
+<h1 align="center">
+  <br>
+   Rusty-Fuzzer
+  <br>
+</h1>
+
+<h4 align="center">A Coverage Guided Evolutionary Fuzzer Written in Rust</h4>
+
+<p align="center">
+  <a href="https://travis-ci.com/s0md3v/XSStrike">
+  <img alt="Travis (.org)" src="https://img.shields.io/travis/nmbr7/Rusty-Fuzzer?style=flat-square">
+  </a>
+</p>
 
 
-*_STATUS :  :heavy_check_mark:  stable_*
+
+
 
 ## # Installation
 
