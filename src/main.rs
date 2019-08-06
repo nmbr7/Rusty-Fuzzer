@@ -51,20 +51,4 @@ fn main() {
     }
     sched(&mut seed_queue, prog_config, &mut fuzzer_status);
 
-    /* Debug
-    for i in 0..conf_queue.len() {
-        println!(
-            " \nseed : {:?}\ninput : {}\nTimeout : {}\n",
-            conf_queue[i], input, timeout
-        );
-    //fuzzer_status.update(conf_queue.len());
-    }
-    */
-
-    /*for i in 0..conf_queue.len() {
-    println!(
-        " \nseed : {:?}\ninput : {}\nTimeout : {}\n",
-        conf_queue[i], input, timeout
-    );
-    }*/
 }
