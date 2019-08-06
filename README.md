@@ -2,7 +2,7 @@
 __A Coverage Guided Evolutionary Fuzzer Written in Rust__
 
 
-*_STATUS :  :negative_squared_cross_mark:  Unstable_*
+*_STATUS :  :heavy_check_mark:  stable_*
 
 ## # Installation
 
@@ -24,14 +24,29 @@ cargo build --release
 2) Running the fuzzer
 ```
 cd target/release
-./rusty-fuzzer
+./rusty-fuzzer  --help
+rusty_fuzzer 0.1.0
+nmbr_7
+A grey box evolutionary fuzzer
+
+USAGE:
+    rusty-fuzzer [OPTIONS] --input <INPUT_COMMAND> --seed <SEED_FILE_DIR>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -i, --input <INPUT_COMMAND>     Input program and arguments where the argument to be fuzzed is specified by '@'
+    -t, --inputtype <INPUT_TYPE>    Input type taken by the program (FileInput(f) or command line TextInput(c))
+    -s, --seed <SEED_FILE_DIR>      Seed directory to use
+
 ```
-<img src="/Images/help.png" width=70% height=70% >
+
 
 ## # Notes
 This program has only been tested on a Linux (Arch linux) system.
 It should build and run on all other linux and unix-like systems, though it is not guaranteed. 
 
-:bangbang: The Fuzzer is currently experimental.
 
 _**This documentation is not complete, and other details related to binary instrumentations and fuzzing a binary will be updated shortly**_ 
