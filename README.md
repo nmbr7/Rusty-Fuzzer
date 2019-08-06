@@ -7,13 +7,10 @@
 <h4 align="center">A Coverage Guided Evolutionary Fuzzer Written in Rust</h4>
 
 <p align="center">
-  <a href="https://travis-ci.com/s0md3v/XSStrike">
+  <a href="https://travis-ci.org/nmbr7/Rusty-Fuzzer">
   <img alt="Travis (.org)" src="https://img.shields.io/travis/nmbr7/Rusty-Fuzzer?style=flat-square">
   </a>
 </p>
-
-
-
 
 
 ## # Installation
