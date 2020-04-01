@@ -8,9 +8,9 @@
 
 <p align="center">
   <a href="https://travis-ci.org/nmbr7/Rusty-Fuzzer">
-  <img alt="#" src="https://img.shields.io/github/license/nmbr7/Rusty-Fuzzer?style=flat-square"></a>
- 
- <img alt="Travis (.org)" src="https://img.shields.io/travis/nmbr7/Rusty-Fuzzer?style=flat-square">
+    <img alt="#" src="https://img.shields.io/travis/nmbr7/Rusty-Fuzzer?style=flat-square">
+  </a>
+  <img alt="#" src="https://img.shields.io/github/license/nmbr7/Rusty-Fuzzer?style=flat-square">
   
   <img alt="#" src="https://img.shields.io/github/v/release/nmbr7/Rusty-Fuzzer?include_prereleases&style=flat-square">
     
